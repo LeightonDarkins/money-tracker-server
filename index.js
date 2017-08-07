@@ -27,6 +27,23 @@ app.get('/currency', (req, res) => {
   })
 })
 
+app.get('/accounts', (req, res) => {
+  console.info('SERVER: getting accounts')
+
+  res.status(200).send([
+    {
+      id: '1',
+      name: 'Transaction',
+      balance: 20.47
+    },
+    {
+      id: '2',
+      name: 'Savings',
+      balance: 400.57
+    }
+  ])
+})
+
 app.listen(port, () => {
   console.info('SERVER: started on ' + port)
 })
