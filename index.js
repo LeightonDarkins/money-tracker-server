@@ -3,7 +3,6 @@ require('./config/node-config')
 const port = process.env.PORT
 
 const express = require('express')
-const axios = require('axios')
 
 let app = express();
 
@@ -12,19 +11,6 @@ app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "*")
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
   next()
-})
-
-app.get('/currency', (req, res) => {
-  console.info('SERVER: getting USD to AUD rate')
-
-  axios.get(`http://www.apilayer.net/api/live?access_key=${process.env.MONEY_TRACKER_APP_ID}&source=USD&currencies=AUD&format=1`)
-  .then((data) =>{
-    res.send(data.data.quotes)
-  })
-  .catch((error) => {
-    res.status(500).send(error)
-    console.error(error)
-  })
 })
 
 app.get('/accounts', (req, res) => {
@@ -42,6 +28,12 @@ app.get('/accounts', (req, res) => {
       balance: 400.57
     }
   ])
+})
+
+app.post('/account', (req, res) => {
+  console.info('SERVER: creating account')
+
+  res.status(201).send({})
 })
 
 app.listen(port, () => {
