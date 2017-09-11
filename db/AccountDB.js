@@ -1,3 +1,5 @@
+const COLLECTION_NAME = 'accounts'
+
 class AccountDB {
   constructor (mongodb, ObjectID) {
     this.db = mongodb
@@ -5,27 +7,27 @@ class AccountDB {
   }
 
   create (account) {
-    return this.db.collection('accounts').save(account)
+    return this.db.collection(COLLECTION_NAME).save(account)
   }
 
   find (id) {
     const query = this._buildQuery(id)
 
-    return this.db.collection('accounts').find(query).toArray()
+    return this.db.collection(COLLECTION_NAME).find(query).toArray()
   }
 
   delete (id) {
     const query = this._buildQuery(id)
 
-    if (query._id) return this.db.collection('accounts').deleteOne(query)
+    if (query._id) return this.db.collection(COLLECTION_NAME).deleteOne(query)
 
-    return this.db.collection('accounts').deleteMany(query)
+    return this.db.collection(COLLECTION_NAME).deleteMany(query)
   }
 
   update ({ id, account }) {
     const query = this._buildQuery(id)
 
-    return this.db.collection('accounts').replaceOne(query, account)
+    return this.db.collection(COLLECTION_NAME).replaceOne(query, account)
   }
 
   _buildQuery (id) {
