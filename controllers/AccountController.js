@@ -1,3 +1,5 @@
+const Account = require('../models/Account')
+
 class AccountController {
   constructor (db, logger) {
     this.db = db
@@ -6,6 +8,10 @@ class AccountController {
 
   createAccount (request, response) {
     this.logger('creating account')
+
+    const account = new Account()
+      .withName(request.body.name)
+      .withBalance(request.body.balance)
 
     this.db.create(request.body)
       .then(result => {

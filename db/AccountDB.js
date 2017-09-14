@@ -1,3 +1,5 @@
+const _ = require('lodash')
+
 const COLLECTION_NAME = 'accounts'
 
 class AccountDB {
@@ -13,7 +15,18 @@ class AccountDB {
   find (id) {
     const query = this._buildQuery(id)
 
-    return this.db.collection(COLLECTION_NAME).find(query).toArray()
+    return new Promise((resolve, reject) => {
+      this.db.collection(COLLECTION_NAME)
+        .find(query)
+        .toArray()
+        .then(accounts => {
+          this._replaceIDs(accounts)
+          resolve(accounts)
+        })
+        .catch(error => {
+          reject(error)
+        })
+    })
   }
 
   delete (id) {
@@ -36,6 +49,17 @@ class AccountDB {
     if (id) query = { _id: this.ObjectID(id) }
 
     return query
+  }
+
+  _replaceIDs (accounts) {
+    _.each(accounts, (account) => {
+      this._replaceID(account)
+    })
+  }
+
+  _replaceID (account) {
+    account.id = account._id
+    delete account['_id']
   }
 }
 
