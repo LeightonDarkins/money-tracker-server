@@ -4,5 +4,5 @@ machine:
 deployment:
   staging:
     branch: master
-      heroku:
-        appname: money-tracker-server
+    heroku:
+      appname: money-tracker-server
