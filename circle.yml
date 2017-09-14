@@ -4,5 +4,5 @@ machine:
 deployment:
   staging:
     branch: master
-    commands:
-      - git push git@heroku.com:money-tracker-server.git $CRICLE_SHA1:master
+      heroku:
+        appname: money-tracker-server
