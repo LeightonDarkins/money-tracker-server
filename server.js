@@ -4,12 +4,14 @@ const express = require('express')
 const bodyParser = require('body-parser');
 const ObjectID = require('mongodb').ObjectID
 const port = process.env.PORT
-const AccountController = require('./controllers/AccountController')
-const AccountDB = require('./db/AccountDB')
-const AccountRouter = require('./routers/AccountRouter')
+
+const AccountDB = require('./db/Account.db')
+const AccountModel = require('./models/Account.model')
+const AccountController = require('./controllers/Account.controller')
+const AccountRouter = require('./routers/Account.router')
 
 module.exports = {
-  setupServer: (database) => {
+  setupServer: () => {
     let app = express();
 
     app.use(bodyParser.json());
@@ -19,7 +21,7 @@ module.exports = {
       next()
     })
 
-    AccountRouter.setupRoutes(new AccountController(new AccountDB(database, ObjectID), logger), app)
+    AccountRouter.setupRoutes(new AccountController(new AccountDB(AccountModel, ObjectID), logger), app)
 
     app.listen(port, () => { logger(`started on ${port}`) })
   }

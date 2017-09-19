@@ -1,5 +1,3 @@
-const Account = require('../models/Account')
-
 class AccountController {
   constructor (db, logger) {
     this.db = db
@@ -9,15 +7,13 @@ class AccountController {
   createAccount (request, response) {
     this.logger('creating account')
 
-    const account = new Account()
-      .withName(request.body.name)
-      .withBalance(request.body.balance)
-
     this.db.create(request.body)
       .then(result => {
         return response.status(201).send(result)
       })
       .catch(error => {
+        if (error.name === 'ValidationError') return response.status(400).send(error.errors)
+
         return response.status(500).send(error)
       })
   }
