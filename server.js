@@ -15,6 +15,11 @@ const CategoryModel = require('./models/Category/Category.model')
 const CategoryController = require('./controllers/Category.controller')
 const CategoryRouter = require('./routers/Category.router')
 
+const TransactionDB = require('./db/Transaction/Transaction.db')
+const TransactionModel = require('./models/Transaction/Transaction.model')
+const TransactionController = require('./controllers/Transaction.controller')
+const TransactionRouter = require('./routers/Transaction.router')
+
 module.exports = {
   setupServer: () => {
     let app = express();
@@ -28,6 +33,7 @@ module.exports = {
 
     AccountRouter.setupRoutes(new AccountController(new AccountDB(AccountModel, ObjectID), logger), app)
     CategoryRouter.setupRoutes(new CategoryController(new CategoryDB(CategoryModel, ObjectID), logger), app)
+    TransactionRouter.setupRoutes(new TransactionController(new TransactionDB(TransactionModel, ObjectID), logger), app)
 
     app.listen(port, () => { logger(`started on ${port}`) })
   }

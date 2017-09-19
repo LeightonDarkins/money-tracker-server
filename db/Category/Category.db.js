@@ -1,7 +1,5 @@
 const _ = require('lodash')
 
-const COLLECTION_NAME = 'categories'
-
 class CategoryDB {
   constructor (CategoryModel, ObjectID) {
     this.CategoryModel = CategoryModel

@@ -1,7 +1,5 @@
 const _ = require('lodash')
 
-const COLLECTION_NAME = 'accounts'
-
 class AccountDB {
   constructor (AccountModel, ObjectID) {
     this.AccountModel = AccountModel
