@@ -6,8 +6,8 @@ class TransactionDB {
     this.ObjectID = ObjectID
   }
 
-  create ({ amount, category, date}) {
-    const Transaction = new this.TransactionModel({ amount, category, date })
+  create ({ amount, category, account, date}) {
+    const Transaction = new this.TransactionModel({ amount, category, account, date })
 
     return Transaction.save()
   }
@@ -35,8 +35,6 @@ class TransactionDB {
 
   update ({ id, transaction }) {
     const query = this._buildQuery(id)
-
-    console.log(transaction)
 
     return this.TransactionModel.updateOne(query, transaction).exec()
   }

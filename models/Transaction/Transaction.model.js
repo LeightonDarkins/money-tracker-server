@@ -9,8 +9,14 @@ const TransactionSchema = mongoose.Schema({
     type: Number,
     required: true
   },
+  account: {
+    type: ObjectId,
+    ref: 'Account',
+    required: true
+  },
   category: {
     type: ObjectId,
+    ref: 'Category',
     required: true
   },
   date: {

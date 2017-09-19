@@ -7,8 +7,6 @@ class TransactionController {
   createTransaction (request, response) {
     this.logger('creating transaction')
 
-    console.log(request.body)
-
     this.db.create(request.body)
       .then(result => {
         return response.status(201).send(result)
