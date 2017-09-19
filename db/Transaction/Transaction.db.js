@@ -1,4 +1,3 @@
-// IGNORE THIS
 const _ = require('lodash')
 
 class TransactionDB {
