@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "test": "jest --verbose"
+    "test-watch": "jest --verbose --watch",
+    "test": "npm run lint && jest",
+    "lint": "./node_modules/standard/bin/cmd.js"
   },
   "author": "",
   "license": "ISC",
@@ -19,6 +21,7 @@
   },
   "devDependencies": {
     "jest": "^21.1.0",
-    "sinon": "^3.3.0"
+    "sinon": "^3.3.0",
+    "standard": "^10.0.3"
   }
 }

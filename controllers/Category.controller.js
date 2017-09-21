@@ -73,7 +73,7 @@ class CategoryController {
   updateCategory (request, response) {
     this.logger(`updating category: ${request.params.id}`)
 
-    this.db.update({ id: request.params.id, category: request.body})
+    this.db.update({ id: request.params.id, category: request.body })
       .then(result => {
         if (result.modifiedCount === 0) return response.status(404).send({})
 

@@ -1,3 +1,5 @@
+/* global describe it expect */
+
 const TransactionModel = require('./Transaction.model')
 const mongoose = require('mongoose')
 mongoose.Promise = global.Promise

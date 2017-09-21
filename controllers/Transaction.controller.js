@@ -71,7 +71,7 @@ class TransactionController {
   updateTransaction (request, response) {
     this.logger(`updating transaction: ${request.params.id}`)
 
-    this.db.update({ id: request.params.id, transaction: request.body})
+    this.db.update({ id: request.params.id, transaction: request.body })
       .then(result => {
         if (result.modifiedCount === 0) return response.status(404).send({})
 

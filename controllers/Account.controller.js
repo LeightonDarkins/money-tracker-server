@@ -73,7 +73,7 @@ class AccountController {
   updateAccount (request, response) {
     this.logger(`updating account: ${request.params.id}`)
 
-    this.db.update({ id: request.params.id, account: request.body})
+    this.db.update({ id: request.params.id, account: request.body })
       .then(result => {
         if (result.modifiedCount === 0) return response.status(404).send({})
 

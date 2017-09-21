@@ -1,3 +1,5 @@
+/* global describe it expect */
+
 const CategoryModel = require('./Category.model')
 const mongoose = require('mongoose')
 mongoose.Promise = global.Promise

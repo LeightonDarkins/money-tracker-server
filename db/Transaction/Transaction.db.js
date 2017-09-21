@@ -6,7 +6,7 @@ class TransactionDB {
     this.ObjectID = ObjectID
   }
 
-  create ({ amount, category, account, date}) {
+  create ({ amount, category, account, date }) {
     const Transaction = new this.TransactionModel({ amount, category, account, date })
 
     return Transaction.save()

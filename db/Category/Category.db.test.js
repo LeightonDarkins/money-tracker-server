@@ -1,3 +1,5 @@
+/* global describe it expect */
+
 const sinon = require('sinon')
 const ObjectID = require('mongodb').ObjectID
 const CategoryDB = require('./Category.db')

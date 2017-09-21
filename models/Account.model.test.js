@@ -1,3 +1,5 @@
+/* global describe it expect */
+
 const AccountModel = require('./Account.model')
 const mongoose = require('mongoose')
 mongoose.Promise = global.Promise
