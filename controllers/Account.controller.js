@@ -1,15 +1,20 @@
 class AccountController {
-  constructor (db, logger) {
-    this.db = db
+  constructor (AccountDB, TransactionDB, logger) {
+    this.AccountDB = AccountDB
+    this.TransactionDB = TransactionDB
     this.logger = logger
   }
 
   createAccount (request, response) {
     this.logger('creating account')
 
-    this.db.create(request.body)
-      .then(result => {
-        return response.status(201).send(result)
+    this.AccountDB.create(request.body)
+      .then(account => {
+        if (request.body.openingBalance) {
+          return this._createInitialTransaction(response, account._id, request.body.openingBalance)
+        } else {
+          return response.sendStatus(201)
+        }
       })
       .catch(error => {
         if (error.name === 'ValidationError') return response.status(400).send(error.errors)
@@ -21,7 +26,7 @@ class AccountController {
   getAccounts (request, response) {
     this.logger('getting accounts')
 
-    this.db.find()
+    this.AccountDB.find()
       .then(accounts => {
         return response.status(200).send(accounts)
       })
@@ -33,7 +38,7 @@ class AccountController {
   getAccount (request, response) {
     this.logger(`getting account: ${request.params.id}`)
 
-    this.db.find(request.params.id)
+    this.AccountDB.find(request.params.id)
       .then(accounts => {
         if (accounts.length === 0) return response.status(404).send({})
 
@@ -47,7 +52,7 @@ class AccountController {
   deleteAccount (request, response) {
     this.logger(`deleting account: ${request.params.id}`)
 
-    this.db.delete(request.params.id)
+    this.AccountDB.delete(request.params.id)
       .then(result => {
         if (result.deletedCount === 0) return response.status(404).send({})
 
@@ -61,7 +66,7 @@ class AccountController {
   deleteAccounts (request, response) {
     this.logger('deleting accounts')
 
-    this.db.delete()
+    this.AccountDB.delete()
       .then(result => {
         return response.status(204).send({})
       })
@@ -73,7 +78,7 @@ class AccountController {
   updateAccount (request, response) {
     this.logger(`updating account: ${request.params.id}`)
 
-    this.db.update({ id: request.params.id, account: request.body })
+    this.AccountDB.update({ id: request.params.id, account: request.body })
       .then(result => {
         if (result.modifiedCount === 0) return response.status(404).send({})
 
@@ -82,6 +87,34 @@ class AccountController {
       .catch(error => {
         return response.status(500).send(error)
       })
+  }
+
+  getBalance (request, response) {
+    this.logger(`getting balance for account: ${request.params.id}`)
+
+    this.TransactionDB.findByAccountId({ account: request.params.id }).then(transactions => {
+      const balance = transactions.reduce((a, b) => a + b.amount, 0)
+
+      return response.status(200).send({ balance })
+    })
+    .catch(error => {
+      return response.status(500).send(error)
+    })
+  }
+
+  _createInitialTransaction (response, account, amount) {
+    this.logger(`creating initial transaction for account: ${account}`)
+
+    const initialTransaction = {
+      amount,
+      category: '59dd17f5549f1471ed426c31',
+      account: account,
+      date: Date.now()
+    }
+
+    return this.TransactionDB.create(initialTransaction)
+    .then(() => response.sendStatus(201))
+    .catch(error => response.status(500).send(error))
   }
 }
 

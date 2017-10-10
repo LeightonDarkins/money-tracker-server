@@ -7,7 +7,7 @@ class AccountDB {
   }
 
   create (account) {
-    const Account = new this.AccountModel({ name: account.name, balance: account.balance })
+    const Account = new this.AccountModel({ name: account.name, openingBalance: account.openingBalance })
 
     return Account.save()
   }

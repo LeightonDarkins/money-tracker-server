@@ -27,6 +27,10 @@ class TransactionDB {
     })
   }
 
+  findByAccountId (query) {
+    return this.TransactionModel.find(query).exec()
+  }
+
   delete (id) {
     const query = this._buildQuery(id)
 

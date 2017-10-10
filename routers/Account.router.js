@@ -6,5 +6,6 @@ module.exports = {
     app.get('/account/:id', (req, res) => controller.getAccount(req, res))
     app.delete('/account/:id', (req, res) => controller.deleteAccount(req, res))
     app.put('/account/:id', (req, res) => controller.updateAccount(req, res))
+    app.get('/account/:id/balance', (req, res) => controller.getBalance(req, res))
   }
 }

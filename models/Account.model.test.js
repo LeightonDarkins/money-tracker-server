@@ -6,8 +6,8 @@ mongoose.Promise = global.Promise
 
 describe('AccountModel', () => {
   describe('validation', () => {
-    it('should be valid with balance as a string', (done) => {
-      var account = new AccountModel({ name: 'test', balance: '100' })
+    it('should be valid with openingBalance as a string', (done) => {
+      var account = new AccountModel({ name: 'test', openingBalance: '100' })
 
       account.validate((err) => {
         expect(err).toBeNull()
@@ -15,8 +15,17 @@ describe('AccountModel', () => {
       })
     })
 
-    it('should be valid with balance as a number', (done) => {
-      var account = new AccountModel({ name: 'test', balance: 100 })
+    it('should be valid with openingBalance as a number', (done) => {
+      var account = new AccountModel({ name: 'test', openingBalance: 100 })
+
+      account.validate((err) => {
+        expect(err).toBeNull()
+        done()
+      })
+    })
+
+    it('should be valid if openingBalance is empty', (done) => {
+      var account = new AccountModel({ name: 'test' })
 
       account.validate((err) => {
         expect(err).toBeNull()
@@ -25,7 +34,7 @@ describe('AccountModel', () => {
     })
 
     it('should be invalid if name is empty', (done) => {
-      var account = new AccountModel({ balance: 200 })
+      var account = new AccountModel({ openingBalance: 200 })
 
       account.validate((err) => {
         expect(err.errors.name).toBeDefined()
@@ -34,7 +43,7 @@ describe('AccountModel', () => {
     })
 
     it('should be invalid if name is too short', (done) => {
-      var account = new AccountModel({ name: '12', balance: 200 })
+      var account = new AccountModel({ name: '12', openingBalance: 200 })
 
       account.validate((err) => {
         expect(err.errors.name).toBeDefined()
@@ -42,20 +51,11 @@ describe('AccountModel', () => {
       })
     })
 
-    it('should be invalid if balance is empty', (done) => {
-      var account = new AccountModel({ name: 'test' })
-
-      account.validate((err) => {
-        expect(err.errors.balance).toBeDefined()
-        done()
-      })
-    })
-
     it('should be invalid if balance is not a number', (done) => {
-      var account = new AccountModel({ name: 'test', balance: 'test' })
+      var account = new AccountModel({ name: 'test', openingBalance: 'test' })
 
       account.validate((err) => {
-        expect(err.errors.balance).toBeDefined()
+        expect(err.errors.openingBalance).toBeDefined()
         done()
       })
     })

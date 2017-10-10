@@ -31,7 +31,7 @@ module.exports = {
       next()
     })
 
-    AccountRouter.setupRoutes(new AccountController(new AccountDB(AccountModel, ObjectID), logger), app)
+    AccountRouter.setupRoutes(new AccountController(new AccountDB(AccountModel, ObjectID), new TransactionDB(TransactionModel, ObjectID), logger), app)
     CategoryRouter.setupRoutes(new CategoryController(new CategoryDB(CategoryModel, ObjectID), logger), app)
     TransactionRouter.setupRoutes(new TransactionController(new TransactionDB(TransactionModel, ObjectID), logger), app)
 

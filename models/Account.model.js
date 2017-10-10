@@ -9,9 +9,8 @@ const AccountSchema = mongoose.Schema({
     required: true,
     minlength: 3
   },
-  balance: {
-    type: Number,
-    required: true
+  openingBalance: {
+    type: Number
   }
 })
 
