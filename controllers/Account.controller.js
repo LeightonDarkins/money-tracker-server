@@ -1,24 +1,21 @@
+const AccountService = require('../services/Account/Account.service')
+
 class AccountController {
   constructor (AccountDB, TransactionDB, logger) {
     this.AccountDB = AccountDB
     this.TransactionDB = TransactionDB
     this.logger = logger
+    this.AccountService = new AccountService(this.AccountDB, this.TransactionDB)
   }
 
   createAccount (request, response) {
     this.logger('creating account')
 
-    this.AccountDB.create(request.body)
-      .then(account => {
-        if (request.body.openingBalance) {
-          return this._createInitialTransaction(response, account._id, request.body.openingBalance)
-        } else {
-          return response.sendStatus(201)
-        }
+    this.AccountService.createAccountWithInitialBalance(request.body)
+      .then(result => {
+        return response.sendStatus(201)
       })
       .catch(error => {
-        if (error.name === 'ValidationError') return response.status(400).send(error.errors)
-
         return response.status(500).send(error)
       })
   }
@@ -42,7 +39,14 @@ class AccountController {
       .then(accounts => {
         if (accounts.length === 0) return response.status(404).send({})
 
-        return response.status(200).send(accounts[0])
+        let account = accounts[0]
+
+        this.AccountService.getAccountBalance(account._id)
+          .then(balance => {
+            account.balance = balance
+
+            return response.status(200).send(account)
+          })
       })
       .catch(error => {
         return response.status(500).send(error)
@@ -92,29 +96,13 @@ class AccountController {
   getBalance (request, response) {
     this.logger(`getting balance for account: ${request.params.id}`)
 
-    this.TransactionDB.findByAccountId({ account: request.params.id }).then(transactions => {
-      const balance = transactions.reduce((a, b) => a + b.amount, 0)
-
-      return response.status(200).send({ balance })
-    })
-    .catch(error => {
-      return response.status(500).send(error)
-    })
-  }
-
-  _createInitialTransaction (response, account, amount) {
-    this.logger(`creating initial transaction for account: ${account}`)
-
-    const initialTransaction = {
-      amount,
-      category: '59dd17f5549f1471ed426c31',
-      account: account,
-      date: Date.now()
-    }
-
-    return this.TransactionDB.create(initialTransaction)
-    .then(() => response.sendStatus(201))
-    .catch(error => response.status(500).send(error))
+    this.AccountService.getAccountBalance(request.params.id)
+      .then(balance => {
+        return response.status(200).send({ balance })
+      })
+      .catch(error => {
+        return response.status(500).send(error)
+      })
   }
 }
 
