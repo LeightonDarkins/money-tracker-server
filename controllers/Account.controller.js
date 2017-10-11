@@ -1,4 +1,5 @@
 const AccountService = require('../services/Account/Account.service')
+const _ = require('lodash')
 
 class AccountController {
   constructor (AccountDB, TransactionDB, logger) {
@@ -25,7 +26,19 @@ class AccountController {
 
     this.AccountDB.find()
       .then(accounts => {
-        return response.status(200).send(accounts)
+        let promises = []
+
+        _.each(accounts, (account) => {
+          promises.push(this.AccountService.getAccountBalance(account._id))
+        })
+
+        Promise.all(promises).then(balances => {
+          for (let x = 0; x < balances.length; x++) {
+            accounts[x].balance = balances[x]
+          }
+
+          return response.status(200).send(accounts)
+        })
       })
       .catch(error => {
         return response.status(500).send(error)
