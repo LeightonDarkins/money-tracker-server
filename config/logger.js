@@ -13,7 +13,6 @@ module.exports = createLogger({
     moneyTrackerServerFormat
   ),
   transports: [
-    new transports.File({ filename: 'money-tracker-server.error.log', level: 'error' }),
-    new transports.File({ filename: 'money-tracker-server.log' })
+    new transports.Console({ filename: 'money-tracker-server.log' })
   ]
 })
