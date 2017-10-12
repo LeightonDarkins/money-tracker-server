@@ -17,7 +17,8 @@
     "express": "^4.15.4",
     "lodash": "^4.17.4",
     "mongodb": "^2.2.31",
-    "mongoose": "^4.11.12"
+    "mongoose": "^4.11.12",
+    "winston": "^3.0.0-rc0"
   },
   "devDependencies": {
     "jest": "^21.1.0",

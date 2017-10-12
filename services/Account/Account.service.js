@@ -1,18 +1,19 @@
 module.exports = class AccountService {
-  constructor (AccountDB, TransactionDB) {
+  constructor (logger, AccountDB, TransactionDB) {
+    this.logger = logger
     this.AccountDB = AccountDB
     this.TransactionDB = TransactionDB
   }
 
   createAccountWithInitialBalance (account) {
-    console.log(`ACCOUNT SERVICE: creating account with initial balance`)
+    this.logger.info(`${this.constructor.name} creating account with initial balance`)
 
     return this.AccountDB.create(account)
       .then(account => this._createInitialTransaction(account._id, account.openingBalance))
   }
 
   _createInitialTransaction (account, amount) {
-    console.log(`ACCOUNT SERVICE: creating initial transaction for account: ${account}`)
+    this.logger.info(`${this.constructor.name} creating initial transaction for account: ${account}`)
 
     amount = amount === null || amount === undefined || isNaN(amount) ? 0 : amount
 
@@ -27,7 +28,7 @@ module.exports = class AccountService {
   }
 
   getAccountBalance (accountID) {
-    console.log(`ACCOUNT SERVICE: getting balance for account: ${accountID}`)
+    this.logger.info(`${this.constructor.name} getting balance for account: ${accountID}`)
 
     return this.TransactionDB.findByAccountId({ account: accountID }).then(transactions => {
       return transactions.reduce((a, b) => a + b.amount, 0)

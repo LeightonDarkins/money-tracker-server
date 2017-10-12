@@ -1,31 +1,35 @@
 const AccountService = require('../services/Account/Account.service')
+const BaseController = require('./Base.controller')
 const _ = require('lodash')
 
-class AccountController {
+class AccountController extends BaseController {
   constructor (AccountDB, TransactionDB, logger) {
+    super(logger)
+
     this.AccountDB = AccountDB
     this.TransactionDB = TransactionDB
-    this.logger = logger
-    this.AccountService = new AccountService(this.AccountDB, this.TransactionDB)
+    this.AccountService = new AccountService(this.logger, this.AccountDB, this.TransactionDB)
   }
 
   createAccount (request, response) {
-    this.logger('creating account')
+    this.logInfo('creating account')
 
     this.AccountService.createAccountWithInitialBalance(request.body)
       .then(result => {
         return response.sendStatus(201)
       })
       .catch(error => {
+        this.logFailedToCreateResource('account', error)
         return response.status(500).send(error)
       })
   }
 
   getAccounts (request, response) {
-    this.logger('getting accounts')
+    this.logInfo('getting accounts')
 
     this.AccountDB.find()
       .then(accounts => {
+        this.logInfo('getting balances for accounts')
         let promises = []
 
         _.each(accounts, (account) => {
@@ -33,6 +37,7 @@ class AccountController {
         })
 
         Promise.all(promises).then(balances => {
+          this.logInfo('applying balances to accounts')
           for (let x = 0; x < balances.length; x++) {
             accounts[x].balance = balances[x]
           }
@@ -41,16 +46,20 @@ class AccountController {
         })
       })
       .catch(error => {
+        this.logFailedToGetResource('accounts', error)
         return response.status(500).send(error)
       })
   }
 
   getAccount (request, response) {
-    this.logger(`getting account: ${request.params.id}`)
+    this.logInfo(`getting account: ${request.params.id}`)
 
     this.AccountDB.find(request.params.id)
       .then(accounts => {
-        if (accounts.length === 0) return response.status(404).send({})
+        if (accounts.length === 0) {
+          this.logFailedToGetResource('account', 'NOT FOUND')
+          return response.status(404).send({})
+        }
 
         let account = accounts[0]
 
@@ -62,58 +71,59 @@ class AccountController {
           })
       })
       .catch(error => {
+        this.logFailedToGetResource('account', error)
         return response.status(500).send(error)
       })
   }
 
   deleteAccount (request, response) {
-    this.logger(`deleting account: ${request.params.id}`)
+    this.logWarn(`deleting account: ${request.params.id}`)
 
     this.AccountDB.delete(request.params.id)
-      .then(result => {
-        if (result.deletedCount === 0) return response.status(404).send({})
-
-        return response.status(204).send({})
+      .then(CommandResult => {
+        return this.handleDeleteResult(CommandResult, response, 'account', this.logger)
       })
       .catch(error => {
+        this.logFailedToDeleteResource('account', error)
         return response.status(500).send(error)
       })
   }
 
   deleteAccounts (request, response) {
-    this.logger('deleting accounts')
+    this.logWarn('deleting accounts')
 
     this.AccountDB.delete()
       .then(result => {
         return response.status(204).send({})
       })
       .catch(error => {
+        this.logFailedToDeleteResource('accounts', error)
         return response.status(500).send(error)
       })
   }
 
   updateAccount (request, response) {
-    this.logger(`updating account: ${request.params.id}`)
+    this.logInfo(`updating account: ${request.params.id}`)
 
     this.AccountDB.update({ id: request.params.id, account: request.body })
       .then(result => {
-        if (result.modifiedCount === 0) return response.status(404).send({})
-
-        return response.status(200).send(result)
+        return this.handleUpdateResult(result, response, 'accou', this.logger)
       })
       .catch(error => {
+        this.logFailedToUpdateResource('account', error)
         return response.status(500).send(error)
       })
   }
 
   getBalance (request, response) {
-    this.logger(`getting balance for account: ${request.params.id}`)
+    this.logInfo(`getting balance for account: ${request.params.id}`)
 
     this.AccountService.getAccountBalance(request.params.id)
       .then(balance => {
         return response.status(200).send({ balance })
       })
       .catch(error => {
+        this.logFailedToGetResource('balance for account', error)
         return response.status(500).send(error)
       })
   }
