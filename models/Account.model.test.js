@@ -51,11 +51,20 @@ describe('AccountModel', () => {
       })
     })
 
-    it('should be invalid if balance is not a number', (done) => {
+    it('should be invalid if openingBalance is not a number', (done) => {
       var account = new AccountModel({ name: 'test', openingBalance: 'test' })
 
       account.validate((err) => {
         expect(err.errors.openingBalance).toBeDefined()
+        done()
+      })
+    })
+
+    it('should be invalid if balance is not a number', (done) => {
+      var account = new AccountModel({ name: 'test', balance: 'test' })
+
+      account.validate((err) => {
+        expect(err.errors.balance).toBeDefined()
         done()
       })
     })
