@@ -4,18 +4,33 @@ class BaseController {
   }
 
   handleUpdateResult (result, response, resource) {
-    if (result.nModified === 0) {
-      this.logFailedToUpdateResource(resource, 'NOT FOUND')
-      return response.status(404).send({})
+    if (isNaN(result.nModified)) {
+      this.logFailedToUpdateResource(resource, 'nModified undefined')
+      return response.sendStatus(500)
     }
 
-    return response.status(200).send(result)
+    if (result.nModified === 0) {
+      this.logFailedToUpdateResource(resource, 'NOT FOUND')
+      return response.sendStatus(404)
+    }
+
+    return response.status(200).send({})
   }
 
   handleDeleteResult (CommandResult, response, resource) {
+    if (!CommandResult.result) {
+      this.logFailedToDeleteResource(resource, 'result undefined')
+      return response.sendStatus(500)
+    }
+
+    if (isNaN(CommandResult.result.n)) {
+      this.logFailedToDeleteResource(resource, 'n undefined')
+      return response.sendStatus(500)
+    }
+
     if (CommandResult.result.n === 0) {
       this.logFailedToDeleteResource(resource, 'NOT FOUND')
-      return response.status(404).send({})
+      return response.sendStatus(404)
     }
 
     return response.status(204).send({})
