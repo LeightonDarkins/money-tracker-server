@@ -1,5 +1,3 @@
-// @flow
-
 const AccountService = require('../services/Account/Account.service')
 const BaseController = require('./Base.controller')
 const _ = require('lodash')
