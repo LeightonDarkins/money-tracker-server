@@ -8,7 +8,7 @@ class AccountController extends BaseController {
 
     this.AccountDB = AccountDB
     this.TransactionDB = TransactionDB
-    this.AccountService = new AccountService(this.logger, this.AccountDB, this.TransactionDB)
+    this.AccountService = new AccountService(this.logger, this.AccountDB, this.TransactionDB, Date)
   }
 
   createAccount (request, response) {
