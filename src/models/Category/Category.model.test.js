@@ -10,7 +10,8 @@ describe('CategoryModel', () => {
       const category = new CategoryModel({ name: 'test' })
 
       category.validate(err => {
-        expect(err).toBeNull()
+        expect(err).to.be.null()
+
         done()
       })
     })
@@ -19,7 +20,8 @@ describe('CategoryModel', () => {
       const category = new CategoryModel()
 
       category.validate(result => {
-        expect(result.errors.name).toBeDefined()
+        expect(result.errors.name).to.exist()
+
         done()
       })
     })
@@ -28,7 +30,8 @@ describe('CategoryModel', () => {
       const category = new CategoryModel({ name: 'te' })
 
       category.validate(result => {
-        expect(result.errors.name).toBeDefined()
+        expect(result.errors.name).to.exist()
+
         done()
       })
     })

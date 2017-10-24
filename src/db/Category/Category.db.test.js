@@ -1,4 +1,4 @@
-/* global describe it expect */
+/* global describe it expect, beforeEach, afterEach */
 
 const sinon = require('sinon')
 const ObjectID = require('mongodb').ObjectID
@@ -9,26 +9,29 @@ let categoryDb
 
 describe('Account DB', () => {
   describe('find', () => {
-    it('translates DB ID to Model ID', (done) => {
-      const expectedModels = [{ _id: '1234', name: 'test' }]
+    let expectedModels, findResult
 
-      const findResult = { exec: y => y }
-      sinon.stub(findResult, 'exec')
-      findResult.exec.resolves(expectedModels)
+    beforeEach(() => {
+      expectedModels = [{ _id: '1234', name: 'test' }]
+      findResult = { exec: y => y }
 
-      sinon.stub(CategoryModel, 'find')
-      CategoryModel.find.returns(findResult)
+      sinon.stub(findResult, 'exec').resolves(expectedModels)
+      sinon.stub(CategoryModel, 'find').returns(findResult)
 
       categoryDb = new CategoryDB(CategoryModel, ObjectID)
+    })
 
-      categoryDb.find().then(result => {
-        expect(result.length).toEqual(1)
-        expect(result[0].id).toEqual('1234')
-        done()
-      })
-
+    afterEach(() => {
       findResult.exec.restore()
       CategoryModel.find.restore()
+    })
+
+    it('translates DB ID to Model ID', (done) => {
+      categoryDb.find().then(result => {
+        expect(result.length).to.equal(1)
+        expect(result[0].id).to.equal('1234')
+        done()
+      })
     })
   })
 })

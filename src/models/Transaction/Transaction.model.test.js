@@ -19,7 +19,7 @@ describe('Transaction', () => {
       })
 
       transaction.validate((err) => {
-        expect(err).toBeNull()
+        expect(err).to.be.null()
         done()
       })
     })
@@ -32,7 +32,7 @@ describe('Transaction', () => {
       })
 
       transaction.validate((err) => {
-        expect(err.errors.amount).toBeDefined()
+        expect(err.errors.amount).to.exist()
         done()
       })
     })
@@ -46,7 +46,7 @@ describe('Transaction', () => {
       })
 
       transaction.validate((err) => {
-        expect(err.errors.amount).toBeDefined()
+        expect(err.errors.amount).to.exist()
         done()
       })
     })
@@ -59,7 +59,7 @@ describe('Transaction', () => {
       })
 
       transaction.validate((err) => {
-        expect(err.errors.account).toBeDefined()
+        expect(err.errors.account).to.exist()
         done()
       })
     })
@@ -73,7 +73,7 @@ describe('Transaction', () => {
       })
 
       transaction.validate((err) => {
-        expect(err.errors.account).toBeDefined()
+        expect(err.errors.account).to.exist()
         done()
       })
     })
@@ -86,7 +86,7 @@ describe('Transaction', () => {
       })
 
       transaction.validate((err) => {
-        expect(err.errors.category).toBeDefined()
+        expect(err.errors.category).to.exist()
         done()
       })
     })
@@ -100,7 +100,7 @@ describe('Transaction', () => {
       })
 
       transaction.validate((err) => {
-        expect(err.errors.category).toBeDefined()
+        expect(err.errors.category).to.exist()
         done()
       })
     })
@@ -113,7 +113,7 @@ describe('Transaction', () => {
       })
 
       transaction.validate((err) => {
-        expect(err.errors.date).toBeDefined()
+        expect(err.errors.date).to.exist()
         done()
       })
     })
@@ -127,7 +127,7 @@ describe('Transaction', () => {
       })
 
       transaction.validate((err) => {
-        expect(err.errors.date).toBeDefined()
+        expect(err.errors.date).to.exist()
         done()
       })
     })

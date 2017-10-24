@@ -1,4 +1,4 @@
-/* global describe, it, jest, expect, beforeEach, afterEach */
+/* global describe, it, expect, beforeEach, afterEach */
 
 const sinon = require('sinon')
 
@@ -9,12 +9,12 @@ const mockLogger = {
 }
 
 const mockAccountDB = {
-  create: jest.fn()
+  create: (y) => y
 }
 
 const mockTransactionDB = {
-  create: jest.fn(),
-  findByAccountId: jest.fn()
+  create: (y) => y,
+  findByAccountId: (y) => y
 }
 
 const mockDate = {
@@ -28,57 +28,77 @@ describe('AccountService', () => {
     accountService = new AccountService(mockLogger, mockAccountDB, mockTransactionDB, mockDate)
   })
 
-  afterEach(() => {
-    mockAccountDB.create.mockReset()
-    mockTransactionDB.create.mockReset()
-    mockTransactionDB.findByAccountId.mockReset()
-  })
-
   describe('createAccountWithInitialBalance', () => {
-    it('calls create on AccountDB', (done) => {
-      mockAccountDB.create.mockReturnValue(Promise.resolve({ _id: 'account-1', openingBalance: 1 }))
+    let id, amount
+
+    beforeEach(() => {
+      id = 'account-1'
+      amount = 1
+
+      sinon.stub(mockAccountDB, 'create').returns(Promise.resolve({ _id: id, openingBalance: amount }))
       sinon.spy(accountService, '_createInitialTransaction')
+      sinon.spy(mockTransactionDB, 'create')
+    })
 
-      accountService.createAccountWithInitialBalance({ openingBalance: 1 })
+    afterEach(() => {
+      mockAccountDB.create.restore()
+      accountService._createInitialTransaction.restore()
+      mockTransactionDB.create.restore()
+    })
 
-      expect(mockAccountDB.create).toHaveBeenCalledWith({ openingBalance: 1 })
+    it('calls create on AccountDB', (done) => {
+      accountService.createAccountWithInitialBalance({ openingBalance: amount })
+        .then(() => {
+          expect(mockAccountDB.create).to.have.been.calledWith({ openingBalance: amount })
+          expect(accountService._createInitialTransaction).to.have.been.calledWith(id, amount)
+          expect(mockTransactionDB.create).to.have.been.calledWith({
+            account: id,
+            amount: amount,
+            category: '59dd17f5549f1471ed426c31',
+            date: mockDate.now()})
 
-      setTimeout(() => {
-        expect(accountService._createInitialTransaction.called).toBeTruthy()
-        expect(mockTransactionDB.create).toHaveBeenCalled()
-
-        accountService._createInitialTransaction.restore()
-
-        done()
-      }, 0)
+          done()
+        })
     })
   })
 
   describe('getAccountBalance', () => {
-    it('calls findByAccountId on TransactionDB and returns the correct balance', () => {
-      mockTransactionDB.findByAccountId.mockReturnValue(Promise.resolve([{ amount: 1 }, { amount: 2 }]))
+    beforeEach(() => {
+      sinon.stub(mockTransactionDB, 'findByAccountId').returns(Promise.resolve([{ amount: 1 }, { amount: 2 }]))
+    })
 
+    afterEach(() => {
+      mockTransactionDB.findByAccountId.restore()
+    })
+
+    it('calls findByAccountId on TransactionDB and returns the correct balance', (done) => {
       accountService.getAccountBalance('account-1').then((output) => {
-        expect(output).toEqual(3)
-      })
+        expect(mockTransactionDB.findByAccountId).to.have.been.calledWith({ account: 'account-1' })
+        expect(output).to.equal(3)
 
-      expect(mockTransactionDB.findByAccountId).toHaveBeenCalledWith({ account: 'account-1' })
+        done()
+      })
     })
   })
 
   describe('_createInitialTransaction', () => {
+    beforeEach(() => {
+      sinon.spy(mockTransactionDB, 'create')
+    })
+
+    afterEach(() => {
+      mockTransactionDB.create.restore()
+    })
+
     it('calls create on TransactionDB with the correct initial-balance category', () => {
       accountService._createInitialTransaction('account-1', 100)
 
-      expect(mockTransactionDB.create).toHaveBeenCalledTimes(1)
-      expect(mockTransactionDB.create).toHaveBeenCalledWith({
+      expect(mockTransactionDB.create).to.have.been.calledWith({
         account: 'account-1',
         amount: 100,
         category: '59dd17f5549f1471ed426c31',
         date: mockDate.now()
       })
-
-      mockTransactionDB.create.mockReset()
     })
   })
 })

@@ -10,7 +10,7 @@ describe('AccountModel', () => {
       var account = new AccountModel({ name: 'test', openingBalance: '100' })
 
       account.validate((err) => {
-        expect(err).toBeNull()
+        expect(err).to.be.null()
         done()
       })
     })
@@ -19,7 +19,7 @@ describe('AccountModel', () => {
       var account = new AccountModel({ name: 'test', openingBalance: 100 })
 
       account.validate((err) => {
-        expect(err).toBeNull()
+        expect(err).to.be.null()
         done()
       })
     })
@@ -28,7 +28,7 @@ describe('AccountModel', () => {
       var account = new AccountModel({ name: 'test' })
 
       account.validate((err) => {
-        expect(err).toBeNull()
+        expect(err).to.be.null()
         done()
       })
     })
@@ -37,7 +37,7 @@ describe('AccountModel', () => {
       var account = new AccountModel({ openingBalance: 200 })
 
       account.validate((err) => {
-        expect(err.errors.name).toBeDefined()
+        expect(err.errors.name).to.exist()
         done()
       })
     })
@@ -46,7 +46,7 @@ describe('AccountModel', () => {
       var account = new AccountModel({ name: '12', openingBalance: 200 })
 
       account.validate((err) => {
-        expect(err.errors.name).toBeDefined()
+        expect(err.errors.name).to.exist()
         done()
       })
     })
@@ -55,7 +55,7 @@ describe('AccountModel', () => {
       var account = new AccountModel({ name: 'test', openingBalance: 'test' })
 
       account.validate((err) => {
-        expect(err.errors.openingBalance).toBeDefined()
+        expect(err.errors.openingBalance).to.exist()
         done()
       })
     })
@@ -64,7 +64,7 @@ describe('AccountModel', () => {
       var account = new AccountModel({ name: 'test', balance: 'test' })
 
       account.validate((err) => {
-        expect(err.errors.balance).toBeDefined()
+        expect(err.errors.balance).to.exist()
         done()
       })
     })

@@ -30,7 +30,7 @@ describe('TransactionDB', () => {
     it('does not call _buildQuery', () => {
       dbUnderTest.findByAccountId()
 
-      expect(dbUnderTest._buildQuery.called).toEqual(false)
+      expect(dbUnderTest._buildQuery.called).to.equal(false)
     })
 
     it('calls .find() on the Model with the given query object', () => {
@@ -38,8 +38,8 @@ describe('TransactionDB', () => {
 
       dbUnderTest.findByAccountId(query)
 
-      expect(TransactionModel.find.calledOnce).toEqual(true)
-      expect(TransactionModel.find.getCall(0).args[0]).toEqual(query)
+      expect(TransactionModel.find.calledOnce).to.equal(true)
+      expect(TransactionModel.find.getCall(0).args[0]).to.equal(query)
     })
   })
 
@@ -47,18 +47,18 @@ describe('TransactionDB', () => {
     it('calls _buildQuery', () => {
       dbUnderTest.find('testing12345')
 
-      expect(dbUnderTest._buildQuery.calledOnce).toEqual(true)
+      expect(dbUnderTest._buildQuery.calledOnce).to.equal(true)
     })
 
     it('calls .find() on the Model with the correct query', () => {
       dbUnderTest.find('testing12345')
 
-      expect(TransactionModel.find.calledOnce).toEqual(true)
+      expect(TransactionModel.find.calledOnce).to.equal(true)
 
       const functionArgument = TransactionModel.find.getCall(0).args[0]
 
-      expect(typeof functionArgument).toEqual('object')
-      expect(typeof functionArgument).not.toEqual('string')
+      expect(typeof functionArgument).to.equal('object')
+      expect(typeof functionArgument).to.not.equal('string')
     })
   })
 })

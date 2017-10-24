@@ -1,31 +1,37 @@
-/* global describe, it, expect, beforeEach, afterEach, jest */
+/* global describe, it, expect, beforeEach, afterEach */
+
+const sinon = require('sinon')
 
 const BaseController = require('./Base.controller')
-let mockResponse, controllerUnderTest, mockLogger
+let mockResponse, controllerUnderTest, mockLogger, mockSend
 
 describe('BaseController', () => {
   beforeEach(() => {
     mockLogger = {
-      error: jest.fn()
+      error: (y) => y
     }
 
     mockResponse = {
-      status: jest.fn(),
-      sendStatus: jest.fn()
+      status: (y) => y,
+      sendStatus: (y) => y
     }
 
-    mockResponse.status.mockReturnValue({
-      send: jest.fn()
-    })
+    mockSend = {
+      send: (y) => y
+    }
+
+    sinon.spy(mockLogger, 'error')
+    sinon.stub(mockResponse, 'status').returns(mockSend)
+    sinon.spy(mockSend, 'send')
+    sinon.spy(mockResponse, 'sendStatus')
 
     controllerUnderTest = new BaseController(mockLogger)
   })
 
   afterEach(() => {
-    mockLogger.error.mockReset()
-    mockResponse.status.mockReset()
-    mockResponse.status.mockReset()
-    mockResponse.sendStatus.mockReset()
+    mockLogger.error.restore()
+    mockResponse.status.restore()
+    mockResponse.sendStatus.restore()
   })
 
   describe('handleUpdateResult', () => {
@@ -34,9 +40,9 @@ describe('BaseController', () => {
 
       controllerUnderTest.handleUpdateResult(mockResult, mockResponse, 'test')
 
-      expect(mockResponse.sendStatus).toBeCalledWith(404)
+      expect(mockResponse.sendStatus).to.have.been.calledWith(404)
 
-      expect(mockLogger.error).toBeCalledWith('BaseController failed to update test. Error: NOT FOUND')
+      expect(mockLogger.error).to.have.been.calledWith('BaseController failed to update test. Error: NOT FOUND')
     })
 
     it('returns 200 when one record was modified', () => {
@@ -44,8 +50,8 @@ describe('BaseController', () => {
 
       controllerUnderTest.handleUpdateResult(mockResult, mockResponse, 'test')
 
-      expect(mockResponse.status).toBeCalledWith(200)
-      expect(mockResponse.status().send).toBeCalledWith({})
+      expect(mockResponse.status).to.have.been.calledWith(200)
+      expect(mockResponse.status().send).to.have.been.calledWith({})
     })
 
     it('returns 500 when the result is not correctly formed', () => {
@@ -53,9 +59,9 @@ describe('BaseController', () => {
 
       controllerUnderTest.handleUpdateResult(mockResult, mockResponse, 'test')
 
-      expect(mockResponse.sendStatus).toBeCalledWith(500)
+      expect(mockResponse.sendStatus).to.have.been.calledWith(500)
 
-      expect(mockLogger.error).toBeCalledWith('BaseController failed to update test. Error: nModified undefined')
+      expect(mockLogger.error).to.have.been.calledWith('BaseController failed to update test. Error: nModified undefined')
     })
   })
 
@@ -65,9 +71,9 @@ describe('BaseController', () => {
 
       controllerUnderTest.handleDeleteResult(mockCommandResult, mockResponse, 'test')
 
-      expect(mockResponse.sendStatus).toBeCalledWith(404)
+      expect(mockResponse.sendStatus).to.have.been.calledWith(404)
 
-      expect(mockLogger.error).toBeCalledWith('BaseController failed to delete test. Error: NOT FOUND')
+      expect(mockLogger.error).to.have.been.calledWith('BaseController failed to delete test. Error: NOT FOUND')
     })
 
     it('returns 204 when one record was deleted', () => {
@@ -75,8 +81,8 @@ describe('BaseController', () => {
 
       controllerUnderTest.handleDeleteResult(mockCommandResult, mockResponse, 'test')
 
-      expect(mockResponse.status).toBeCalledWith(204)
-      expect(mockResponse.status().send).toBeCalledWith({})
+      expect(mockResponse.status).to.have.been.calledWith(204)
+      expect(mockResponse.status().send).to.have.been.calledWith({})
     })
 
     it('returns 500 when the CommandResult is not correctly formed', () => {
@@ -84,9 +90,9 @@ describe('BaseController', () => {
 
       controllerUnderTest.handleDeleteResult(mockCommandResult, mockResponse, 'test')
 
-      expect(mockResponse.sendStatus).toBeCalledWith(500)
+      expect(mockResponse.sendStatus).to.have.been.calledWith(500)
 
-      expect(mockLogger.error).toBeCalledWith('BaseController failed to delete test. Error: n undefined')
+      expect(mockLogger.error).to.have.been.calledWith('BaseController failed to delete test. Error: n undefined')
     })
 
     it('returns 500 when the CommandResult is not correctly formed', () => {
@@ -94,9 +100,9 @@ describe('BaseController', () => {
 
       controllerUnderTest.handleDeleteResult(mockCommandResult, mockResponse, 'test')
 
-      expect(mockResponse.sendStatus).toBeCalledWith(500)
+      expect(mockResponse.sendStatus).to.have.been.calledWith(500)
 
-      expect(mockLogger.error).toBeCalledWith('BaseController failed to delete test. Error: result undefined')
+      expect(mockLogger.error).to.have.been.calledWith('BaseController failed to delete test. Error: result undefined')
     })
   })
 })
