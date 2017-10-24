@@ -1,5 +1,7 @@
 /* global describe, it, jest, expect, beforeEach, afterEach */
 
+const sinon = require('sinon')
+
 const AccountService = require('./Account.service')
 
 const mockLogger = {
@@ -33,12 +35,22 @@ describe('AccountService', () => {
   })
 
   describe('createAccountWithInitialBalance', () => {
-    it('calls create on AccountDB', () => {
+    it('calls create on AccountDB', (done) => {
       mockAccountDB.create.mockReturnValue(Promise.resolve({ _id: 'account-1', openingBalance: 1 }))
+      sinon.spy(accountService, '_createInitialTransaction')
 
       accountService.createAccountWithInitialBalance({ openingBalance: 1 })
 
       expect(mockAccountDB.create).toHaveBeenCalledWith({ openingBalance: 1 })
+
+      setTimeout(() => {
+        expect(accountService._createInitialTransaction.called).toBeTruthy()
+        expect(mockTransactionDB.create).toHaveBeenCalled()
+
+        accountService._createInitialTransaction.restore()
+
+        done()
+      }, 0)
     })
   })
 
