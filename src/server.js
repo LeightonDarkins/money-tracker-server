@@ -5,8 +5,8 @@ const bodyParser = require('body-parser')
 const ObjectID = require('mongodb').ObjectID
 const port = process.env.PORT
 
-const AccountDB = require('./db/Account.db')
-const AccountModel = require('./models/Account.model')
+const AccountDB = require('./db/Account/Account.db')
+const AccountModel = require('./models/Account/Account.model')
 const AccountController = require('./controllers/Account.controller')
 const AccountRouter = require('./routers/Account.router')
 
