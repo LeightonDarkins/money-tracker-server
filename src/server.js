@@ -34,8 +34,9 @@ module.exports = {
     let accountRouter = new AccountRouter(new AccountController(new AccountDB(AccountModel, ObjectID), new TransactionDB(TransactionModel, ObjectID), logger))
     accountRouter.setupRoutes(app)
 
-    // AccountRouter.setupRoutes(new AccountController(new AccountDB(AccountModel, ObjectID), new TransactionDB(TransactionModel, ObjectID), logger), app)
-    CategoryRouter.setupRoutes(new CategoryController(new CategoryDB(CategoryModel, ObjectID), logger), app)
+    let categoryRouter = new CategoryRouter(new CategoryController(new CategoryDB(CategoryModel, ObjectID), logger))
+    categoryRouter.setupRoutes(app)
+
     TransactionRouter.setupRoutes(new TransactionController(new TransactionDB(TransactionModel, ObjectID), logger), app)
 
     app.listen(port, () => { logger.info(`started on ${port}`) })

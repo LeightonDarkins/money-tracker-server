@@ -3,7 +3,7 @@
 const sinon = require('sinon')
 const ObjectID = require('mongodb').ObjectID
 const AccountDB = require('./Account.db')
-const AccountModel = require('../models/Account.model')
+const AccountModel = require('../../models/Account/Account.model')
 
 let accountDB
 

@@ -51,14 +51,14 @@ describe('AccountRouter', () => {
       .end((error) => error ? done(error) : done())
   })
 
-  it('DELETE /account/1 routes to getAccount', (done) => {
+  it('DELETE /account/1 routes to deleteAccount', (done) => {
     request(mockServer)
       .delete('/account/1')
       .expect('deleteAccount')
       .end((error) => error ? done(error) : done())
   })
 
-  it('PUT /account/1 routes to getAccount', (done) => {
+  it('PUT /account/1 routes to updateAccount', (done) => {
     request(mockServer)
       .put('/account/1')
       .expect('updateAccount')
