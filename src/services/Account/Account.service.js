@@ -1,3 +1,5 @@
+const _ = require('lodash')
+
 module.exports = class AccountService {
   constructor (logger, AccountDB, TransactionDB, date) {
     this.logger = logger
@@ -28,6 +30,40 @@ module.exports = class AccountService {
     }
 
     return this.TransactionDB.create(initialTransaction)
+  }
+
+  getAccounts () {
+    return this.AccountDB.find()
+      .then(accounts => {
+        return this._applyBalancesToAccounts(accounts)
+      })
+      .catch(error => {
+        return error
+      })
+  }
+
+  _applyBalancesToAccounts (accounts) {
+    return this._getAccountBalances(accounts)
+      .then((balances) => {
+        this.logger.info(`${this.constructor.name} applying balances to accounts`)
+        for (let x = 0; x < balances.length; x++) {
+          accounts[x].balance = balances[x]
+        }
+
+        return accounts
+      })
+  }
+
+  _getAccountBalances (accounts) {
+    this.logger.info(`${this.constructor.name} getting balances for accounts`)
+
+    let promises = []
+
+    _.each(accounts, (account) => {
+      promises.push(this.getAccountBalance(account._id))
+    })
+
+    return Promise.all(promises)
   }
 
   getAccountBalance (accountID) {

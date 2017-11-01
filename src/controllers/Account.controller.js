@@ -1,6 +1,5 @@
 const AccountService = require('../services/Account/Account.service')
 const BaseController = require('./Base.controller')
-const _ = require('lodash')
 
 class AccountController extends BaseController {
   constructor (AccountDB, TransactionDB, logger) {
@@ -27,25 +26,11 @@ class AccountController extends BaseController {
   getAccounts (request, response) {
     this.logInfo('getting accounts')
 
-    this.AccountDB.find()
-      .then(accounts => {
-        this.logInfo('getting balances for accounts')
-        let promises = []
-
-        _.each(accounts, (account) => {
-          promises.push(this.AccountService.getAccountBalance(account._id))
-        })
-
-        Promise.all(promises).then(balances => {
-          this.logInfo('applying balances to accounts')
-          for (let x = 0; x < balances.length; x++) {
-            accounts[x].balance = balances[x]
-          }
-
-          return response.status(200).send(accounts)
-        })
+    this.AccountService.getAccounts()
+      .then((accounts) => {
+        return response.status(200).send(accounts)
       })
-      .catch(error => {
+      .catch((error) => {
         this.logFailedToGetResource('accounts', error)
         return response.status(500).send(error)
       })

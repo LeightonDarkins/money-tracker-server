@@ -9,7 +9,8 @@ const mockLogger = {
 }
 
 const mockAccountDB = {
-  create: (y) => y
+  create: (y) => y,
+  find: (y) => y
 }
 
 const mockTransactionDB = {
@@ -26,6 +27,96 @@ describe('AccountService', () => {
 
   beforeEach(() => {
     accountService = new AccountService(mockLogger, mockAccountDB, mockTransactionDB, mockDate)
+  })
+
+  describe('getAccounts', () => {
+    beforeEach(() => {
+      let accounts = [
+        {
+          _id: 'account-1',
+          name: 'First Account'
+        },
+        {
+          _id: 'account-2',
+          name: 'Second Account'
+        }
+      ]
+
+      sinon.stub(mockAccountDB, 'find').returns(Promise.resolve(accounts))
+      sinon.stub(accountService, '_applyBalancesToAccounts').returns(Promise.resolve({}))
+    })
+
+    afterEach(() => {
+      mockAccountDB.find.restore()
+      accountService._applyBalancesToAccounts.restore()
+    })
+
+    it('calls find on AccountDB', (done) => {
+      accountService.getAccounts()
+        .then(() => {
+          expect(mockAccountDB.find).to.have.been.called()
+          expect(accountService._applyBalancesToAccounts).to.have.been.called()
+          done()
+        })
+    })
+  })
+
+  describe('_getAccountBalances', () => {
+    beforeEach(() => {
+      sinon.stub(accountService, 'getAccountBalance').returns(Promise.resolve({}))
+    })
+
+    afterEach(() => {
+      accountService.getAccountBalance.restore()
+    })
+
+    it('calls getAccountBalance once for each account it recieves', (done) => {
+      let accounts = [
+        'account-1',
+        'account-2',
+        'account-3'
+      ]
+
+      accountService._getAccountBalances(accounts).then((balances) => {
+        expect(accountService.getAccountBalance).to.have.callCount(3)
+        expect(balances).to.have.length(3)
+
+        done()
+      })
+    })
+  })
+
+  describe('_applyBalancesToAccounts', () => {
+    beforeEach(() => {
+      sinon.stub(accountService, '_getAccountBalances').returns(Promise.resolve([ 100, 200, 300 ]))
+    })
+
+    afterEach(() => {
+      accountService._getAccountBalances.restore()
+    })
+
+    it('calls getAccountBalances and applies the balances to the given accounts', (done) => {
+      let accounts = [
+        {
+          balance: 0
+        },
+        {
+          balance: 0
+        },
+        {
+          balance: 0
+        }
+      ]
+
+      accountService._applyBalancesToAccounts(accounts).then((result) => {
+        expect(accountService._getAccountBalances).to.have.been.calledOnce()
+        expect(accounts[0].balance).to.equal(100)
+        expect(accounts[1].balance).to.equal(200)
+        expect(accounts[2].balance).to.equal(300)
+
+        done()
+      })
+    })
   })
 
   describe('createAccountWithInitialBalance', () => {
