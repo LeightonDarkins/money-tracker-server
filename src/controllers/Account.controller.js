@@ -6,58 +6,51 @@ class AccountController extends BaseController {
     super(logger)
 
     this.AccountDB = AccountDB
-    this.TransactionDB = TransactionDB
-    this.AccountService = new AccountService(this.logger, this.AccountDB, this.TransactionDB, Date)
+    this.AccountService = new AccountService(this.logger, this.AccountDB, TransactionDB, Date)
   }
 
   createAccount (request, response) {
     this.logInfo('creating account')
 
-    this.AccountService.createAccountWithInitialBalance(request.body)
+    return this.AccountService.createAccountWithInitialBalance(request.body)
       .then(result => {
         return response.sendStatus(201)
       })
       .catch(error => {
         this.logFailedToCreateResource('account', error)
-        return response.status(500).send(error)
+        return response.status(500).send(error.message)
       })
   }
 
   getAccounts (request, response) {
     this.logInfo('getting accounts')
 
-    this.AccountService.getAccounts()
+    return this.AccountService.getAccounts()
       .then((accounts) => {
         return response.status(200).send(accounts)
       })
       .catch((error) => {
         this.logFailedToGetResource('accounts', error)
-        return response.status(500).send(error)
+        return response.status(500).send(error.message)
       })
   }
 
   getAccount (request, response) {
     this.logInfo(`getting account: ${request.params.id}`)
 
-    this.AccountDB.find(request.params.id)
-      .then(accounts => {
-        if (accounts.length === 0) {
-          this.logFailedToGetResource('account', 'NOT FOUND')
-          return response.status(404).send({})
-        }
-
-        let account = accounts[0]
-
-        this.AccountService.getAccountBalance(account._id)
-          .then(balance => {
-            account.balance = balance
-
-            return response.status(200).send(account)
-          })
+    return this.AccountService.getAccountWithBalance(request.params.id)
+      .then(account => {
+        return response.status(200).send(account)
       })
       .catch(error => {
         this.logFailedToGetResource('account', error)
-        return response.status(500).send(error)
+
+        switch (error.message) {
+          case 'NOT FOUND':
+            return response.sendStatus(404)
+          default:
+            return response.status(500).send(error.message)
+        }
       })
   }
 

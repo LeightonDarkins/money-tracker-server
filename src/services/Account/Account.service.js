@@ -73,4 +73,15 @@ module.exports = class AccountService {
       return transactions.reduce((a, b) => a + b.amount, 0)
     })
   }
+
+  getAccountWithBalance (accountID) {
+    this.logger.info(`${this.constructor.name} getting account: ${accountID} with balance`)
+
+    return this.AccountDB.find(accountID)
+      .then((accounts) => {
+        if (accounts.length === 0) throw new Error('NOT FOUND')
+
+        return this._applyBalancesToAccounts(accounts)
+      })
+  }
 }

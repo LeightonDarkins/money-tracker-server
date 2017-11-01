@@ -192,4 +192,38 @@ describe('AccountService', () => {
       })
     })
   })
+
+  describe('getAccountWithBalance', () => {
+    it('throws a NOT FOUND error when no accounts are returned', (done) => {
+      sinon.stub(mockAccountDB, 'find').returns(Promise.resolve([]))
+
+      accountService.getAccountWithBalance('id')
+        .catch(error => {
+          expect(error.message).to.equal('NOT FOUND')
+
+          mockAccountDB.find.restore()
+
+          done()
+        })
+    })
+
+    it('finds an Account and applies a Balance to it', (done) => {
+      let accounts = [
+        {
+          _id: 'account-1'
+        }
+      ]
+
+      sinon.stub(mockAccountDB, 'find').returns(Promise.resolve(accounts))
+      sinon.stub(accountService, '_applyBalancesToAccounts').returns(Promise.resolve({}))
+
+      accountService.getAccountWithBalance('id')
+        .then(result => {
+          expect(mockAccountDB.find).to.have.been.called()
+          expect(accountService._applyBalancesToAccounts).to.have.been.called()
+
+          done()
+        })
+    })
+  })
 })
