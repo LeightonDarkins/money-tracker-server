@@ -5,33 +5,52 @@ const sinon = require('sinon')
 const AccountController = require('./Account.controller')
 
 describe('AccountController', () => {
-  let accountController, mockLogger, mockAccountDB, mockResponse, mockSend
+  const noOp = (y) => y
+
+  let accountController, mockLogger, mockAccountService, mockResponse, mockSend
+  let mockRequest
+  let mockError
 
   beforeEach(() => {
     mockLogger = {
-      info: (y) => y,
-      error: (y) => y
+      info: noOp,
+      error: noOp,
+      warn: noOp
     }
 
-    mockAccountDB = {
-      create: (y) => y,
-      find: (y) => y
+    mockAccountService = {
+      getAccountWithBalance: noOp,
+      createAccountWithInitialBalance: noOp,
+      getAccounts: noOp,
+      deleteAccount: noOp,
+      deleteAccounts: noOp,
+      updateAccount: noOp,
+      getAccountBalance: noOp
     }
 
     mockResponse = {
-      status: (y) => y,
-      sendStatus: (y) => y
+      status: noOp,
+      sendStatus: noOp
     }
 
     mockSend = {
-      send: (y) => y
+      send: noOp
     }
+
+    mockRequest = {
+      params: {
+        id: 'account-1'
+      },
+      body: {}
+    }
+
+    mockError = new Error('error')
 
     sinon.stub(mockResponse, 'status').returns(mockSend)
     sinon.spy(mockSend, 'send')
     sinon.spy(mockResponse, 'sendStatus')
 
-    accountController = new AccountController(mockAccountDB, {}, mockLogger)
+    accountController = new AccountController(mockAccountService, mockLogger)
   })
 
   afterEach(() => {
@@ -42,34 +61,32 @@ describe('AccountController', () => {
 
   describe('createAccount', () => {
     it('returns an empty 201 when successful', (done) => {
-      sinon.stub(accountController.AccountService, 'createAccountWithInitialBalance').returns(Promise.resolve({}))
+      sinon.stub(mockAccountService, 'createAccountWithInitialBalance').returns(Promise.resolve({}))
 
-      accountController.createAccount({}, mockResponse).then((result) => {
-        expect(accountController.AccountService.createAccountWithInitialBalance).to.have.been.calledOnce()
-        expect(mockResponse.sendStatus).to.have.been.calledWith(201)
-        expect(result).to.equal(201)
+      accountController.createAccount({}, mockResponse)
+        .then(() => {
+          expect(mockAccountService.createAccountWithInitialBalance).to.have.been.calledOnce()
+          expect(mockResponse.sendStatus).to.have.been.calledWith(201)
 
-        accountController.AccountService.createAccountWithInitialBalance.restore()
+          mockAccountService.createAccountWithInitialBalance.restore()
 
-        done()
-      })
+          done()
+        })
     })
 
     it('returns a 500 error when unsuccessful', (done) => {
-      const errorBody = 'An error'
+      sinon.stub(mockAccountService, 'createAccountWithInitialBalance').returns(Promise.reject(mockError))
 
-      sinon.stub(accountController.AccountService, 'createAccountWithInitialBalance').returns(Promise.reject(new Error(errorBody)))
+      accountController.createAccount({}, mockResponse)
+        .then(() => {
+          expect(mockAccountService.createAccountWithInitialBalance).to.have.been.calledOnce()
+          expect(mockResponse.status).to.have.been.calledWith(500)
+          expect(mockResponse.status().send).to.have.been.calledWith(mockError.message)
 
-      accountController.createAccount({}, mockResponse).then((result) => {
-        expect(accountController.AccountService.createAccountWithInitialBalance).to.have.been.calledOnce()
-        expect(mockResponse.status).to.have.been.calledWith(500)
-        expect(mockResponse.status().send).to.have.been.calledWith(errorBody)
-        expect(result).to.deep.equal(errorBody)
+          mockAccountService.createAccountWithInitialBalance.restore()
 
-        accountController.AccountService.createAccountWithInitialBalance.restore()
-
-        done()
-      })
+          done()
+        })
     })
   })
 
@@ -80,62 +97,64 @@ describe('AccountController', () => {
         'account-2'
       ]
 
-      sinon.stub(accountController.AccountService, 'getAccounts').returns(Promise.resolve(accounts))
+      sinon.stub(mockAccountService, 'getAccounts').returns(Promise.resolve(accounts))
 
-      accountController.getAccounts({}, mockResponse).then((result) => {
-        expect(accountController.AccountService.getAccounts).to.have.been.calledOnce()
-        expect(mockResponse.status).to.have.been.calledWith(200)
-        expect(mockResponse.status().send).to.have.been.calledWith(accounts)
+      accountController.getAccounts({}, mockResponse)
+        .then(() => {
+          expect(mockAccountService.getAccounts).to.have.been.calledOnce()
+          expect(mockResponse.status).to.have.been.calledWith(200)
+          expect(mockResponse.status().send).to.have.been.calledWith(accounts)
 
-        done()
-      })
+          mockAccountService.getAccounts.restore()
+
+          done()
+        })
     })
 
     it('returns a 500 when unsuccessful', (done) => {
-      sinon.stub(accountController.AccountService, 'getAccounts').returns(Promise.reject(new Error('getAccountsError')))
+      sinon.stub(mockAccountService, 'getAccounts').returns(Promise.reject(mockError))
 
-      accountController.getAccounts({}, mockResponse).then((result) => {
-        expect(accountController.AccountService.getAccounts).to.have.been.calledOnce()
-        expect(mockResponse.status).to.have.been.calledWith(500)
-        expect(mockResponse.status().send).to.have.been.calledWith('getAccountsError')
+      accountController.getAccounts({}, mockResponse)
+        .then(() => {
+          expect(mockAccountService.getAccounts).to.have.been.calledOnce()
+          expect(mockResponse.status).to.have.been.calledWith(500)
+          expect(mockResponse.status().send).to.have.been.calledWith(mockError.message)
 
-        done()
-      })
+          mockAccountService.getAccounts.restore()
+
+          done()
+        })
     })
   })
 
   describe('getAccount', () => {
-    const mockRequest = {
-      params: {
-        id: 'account-1'
-      }
-    }
-
     it('returns a 404 when no account is found', (done) => {
-      sinon.stub(accountController.AccountService, 'getAccountWithBalance').returns(Promise.reject(new Error('NOT FOUND')))
+      sinon.stub(mockAccountService, 'getAccountWithBalance').returns(Promise.reject(new Error('NOT FOUND')))
 
-      accountController.getAccount(mockRequest, mockResponse).then((result) => {
-        expect(accountController.AccountService.getAccountWithBalance).to.have.been.calledWith('account-1')
-        expect(mockResponse.sendStatus).to.have.been.calledWith(404)
+      accountController.getAccount(mockRequest, mockResponse)
+        .then(() => {
+          expect(mockAccountService.getAccountWithBalance).to.have.been.calledWith(mockRequest.params.id)
+          expect(mockResponse.sendStatus).to.have.been.calledWith(404)
 
-        accountController.AccountService.getAccountWithBalance.restore()
+          mockAccountService.getAccountWithBalance.restore()
 
-        done()
-      })
+          done()
+        })
     })
 
     it('returns a 500 when unsuccessful', (done) => {
-      sinon.stub(accountController.AccountService, 'getAccountWithBalance').returns(Promise.reject(new Error('APPLICATION ERROR')))
+      sinon.stub(mockAccountService, 'getAccountWithBalance').returns(Promise.reject(mockError))
 
-      accountController.getAccount(mockRequest, mockResponse).then((result) => {
-        expect(accountController.AccountService.getAccountWithBalance).to.have.been.calledWith('account-1')
-        expect(mockResponse.status).to.have.been.calledWith(500)
-        expect(mockResponse.status().send).to.have.been.calledWith('APPLICATION ERROR')
+      accountController.getAccount(mockRequest, mockResponse)
+        .then(() => {
+          expect(mockAccountService.getAccountWithBalance).to.have.been.calledWith(mockRequest.params.id)
+          expect(mockResponse.status).to.have.been.calledWith(500)
+          expect(mockResponse.status().send).to.have.been.calledWith(mockError.message)
 
-        accountController.AccountService.getAccountWithBalance.restore()
+          mockAccountService.getAccountWithBalance.restore()
 
-        done()
-      })
+          done()
+        })
     })
 
     it('returns a 200 when successful', (done) => {
@@ -144,17 +163,204 @@ describe('AccountController', () => {
         balance: 0
       }
 
-      sinon.stub(accountController.AccountService, 'getAccountWithBalance').returns(Promise.resolve(account))
+      sinon.stub(mockAccountService, 'getAccountWithBalance').returns(Promise.resolve(account))
 
-      accountController.getAccount(mockRequest, mockResponse).then((result) => {
-        expect(accountController.AccountService.getAccountWithBalance).to.have.been.calledWith('account-1')
-        expect(mockResponse.status).to.have.been.calledWith(200)
-        expect(mockResponse.status().send).to.have.been.calledWith(account)
+      accountController.getAccount(mockRequest, mockResponse)
+        .then(() => {
+          expect(mockAccountService.getAccountWithBalance).to.have.been.calledWith(mockRequest.params.id)
+          expect(mockResponse.status).to.have.been.calledWith(200)
+          expect(mockResponse.status().send).to.have.been.calledWith(account)
 
-        accountController.AccountService.getAccountWithBalance.restore()
+          mockAccountService.getAccountWithBalance.restore()
 
-        done()
-      })
+          done()
+        })
+    })
+  })
+
+  describe('deleteAccount', () => {
+    it('it returns a 500 when the delete account result is invalid', (done) => {
+      const mockCommandResult = {
+        result: undefined
+      }
+
+      sinon.stub(mockAccountService, 'deleteAccount').returns(Promise.resolve(mockCommandResult))
+
+      accountController.deleteAccount(mockRequest, mockResponse)
+        .then(() => {
+          expect(mockAccountService.deleteAccount).to.have.been.calledWith(mockRequest.params.id)
+          expect(mockResponse.sendStatus).to.have.been.calledWith(500)
+
+          mockAccountService.deleteAccount.reset()
+
+          done()
+        })
+    })
+
+    it('it returns a 500 when an error occurs', (done) => {
+      sinon.stub(mockAccountService, 'deleteAccount').returns(Promise.reject(mockError))
+
+      accountController.deleteAccount(mockRequest, mockResponse)
+        .then(() => {
+          expect(mockResponse.status).to.have.been.calledWith(500)
+          expect(mockResponse.status().send).to.have.been.calledWith(mockError.message)
+
+          done()
+        })
+    })
+
+    it('it returns a 404 when no records are modified', (done) => {
+      const mockCommandResult = {
+        result: {
+          n: 0
+        }
+      }
+
+      sinon.stub(mockAccountService, 'deleteAccount').returns(Promise.resolve(mockCommandResult))
+
+      accountController.deleteAccount(mockRequest, mockResponse)
+        .then(() => {
+          expect(mockAccountService.deleteAccount).to.have.been.calledWith('account-1')
+          expect(mockResponse.sendStatus).to.have.been.calledWith(404)
+
+          mockAccountService.deleteAccount.reset()
+
+          done()
+        })
+    })
+
+    it('it returns a 204 when a record is deleted', (done) => {
+      const mockCommandResult = {
+        result: {
+          n: 1
+        }
+      }
+
+      sinon.stub(mockAccountService, 'deleteAccount').returns(Promise.resolve(mockCommandResult))
+
+      accountController.deleteAccount(mockRequest, mockResponse)
+        .then(() => {
+          expect(mockAccountService.deleteAccount).to.have.been.calledWith(mockRequest.params.id)
+          expect(mockResponse.status).to.have.been.calledWith(204)
+          expect(mockResponse.status().send).to.have.been.calledWith({})
+
+          mockAccountService.deleteAccount.reset()
+
+          done()
+        })
+    })
+  })
+
+  describe('deleteAccounts', () => {
+    it('returns a 204 when successful', done => {
+      sinon.stub(mockAccountService, 'deleteAccounts').returns(Promise.resolve({}))
+
+      accountController.deleteAccounts({}, mockResponse)
+        .then(() => {
+          expect(mockAccountService.deleteAccounts).to.have.been.calledOnce()
+          expect(mockResponse.sendStatus).to.have.been.calledWith(204)
+
+          done()
+        })
+    })
+
+    it('returns a 500 when an error occurs', done => {
+      sinon.stub(mockAccountService, 'deleteAccounts').returns(Promise.reject(mockError))
+
+      accountController.deleteAccounts({}, mockResponse)
+        .then(() => {
+          expect(mockAccountService.deleteAccounts).to.have.been.calledOnce()
+          expect(mockResponse.status).to.have.been.calledWith(500)
+          expect(mockResponse.status().send).to.have.been.calledWith(mockError.message)
+
+          done()
+        })
+    })
+  })
+
+  describe('updateAccount', () => {
+    it('returns a 500 when service response is invalid', done => {
+      const mockResult = {
+        nModified: undefined
+      }
+
+      sinon.stub(mockAccountService, 'updateAccount').returns(Promise.resolve(mockResult))
+
+      accountController.updateAccount(mockRequest, mockResponse)
+        .then(() => {
+          expect(mockAccountService.updateAccount).to.have.been.calledOnce()
+          expect(mockResponse.sendStatus).to.have.been.calledWith(500)
+
+          mockAccountService.updateAccount.restore()
+
+          done()
+        })
+    })
+
+    it('returns a 500 when no records are modified', done => {
+      const mockResult = {
+        nModified: 0
+      }
+
+      sinon.stub(mockAccountService, 'updateAccount').returns(Promise.resolve(mockResult))
+
+      accountController.updateAccount(mockRequest, mockResponse)
+        .then(() => {
+          expect(mockAccountService.updateAccount).to.have.been.calledOnce()
+          expect(mockResponse.sendStatus).to.have.been.calledWith(404)
+
+          mockAccountService.updateAccount.restore()
+
+          done()
+        })
+    })
+
+    it('returns a 200 when successful', done => {
+      const mockResult = {
+        nModified: 1
+      }
+
+      sinon.stub(mockAccountService, 'updateAccount').returns(Promise.resolve(mockResult))
+
+      accountController.updateAccount(mockRequest, mockResponse)
+        .then(() => {
+          expect(mockAccountService.updateAccount).to.have.been.calledOnce()
+          expect(mockResponse.sendStatus).to.have.been.calledWith(200)
+
+          mockAccountService.updateAccount.restore()
+
+          done()
+        })
+    })
+  })
+
+  describe('getBalance', () => {
+    it('returns a 200 when successful', done => {
+      sinon.stub(mockAccountService, 'getAccountBalance').returns(Promise.resolve(1000))
+
+      accountController.getBalance(mockRequest, mockResponse)
+        .then(() => {
+          expect(mockResponse.status).to.have.been.calledWith(200)
+          expect(mockResponse.status().send).to.have.been.calledWith({ balance: 1000 })
+
+          mockAccountService.getAccountBalance.restore()
+
+          done()
+        })
+    })
+
+    it('returns a 500 when an error occurs', done => {
+      sinon.stub(mockAccountService, 'getAccountBalance').returns(Promise.reject(mockError))
+
+      accountController.getBalance(mockRequest, mockResponse)
+        .then(() => {
+          expect(mockResponse.status).to.have.been.calledWith(500)
+          expect(mockResponse.status().send).to.have.been.calledWith(mockError.message)
+
+          mockAccountService.getAccountBalance.restore()
+
+          done()
+        })
     })
   })
 })

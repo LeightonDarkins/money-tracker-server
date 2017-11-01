@@ -84,4 +84,22 @@ module.exports = class AccountService {
         return this._applyBalancesToAccounts(accounts)
       })
   }
+
+  deleteAccount (accountID) {
+    this.logger.warn(`${this.constructor.name} deleting account: ${accountID}`)
+
+    return this.AccountDB.delete(accountID)
+  }
+
+  deleteAccounts (accountID) {
+    this.logger.warn(`${this.constructor.name} deleting accounts`)
+
+    return this.AccountDB.delete()
+  }
+
+  updateAccount (accountID, account) {
+    this.logger.warn(`${this.constructor.name} updating account: ${accountID}`)
+
+    return this.AccountDB.update({ id: accountID, account: account })
+  }
 }

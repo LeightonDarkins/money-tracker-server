@@ -3,21 +3,24 @@
 const sinon = require('sinon')
 
 const BaseController = require('./Base.controller')
+
+const noOp = (y) => y
+
 let mockResponse, controllerUnderTest, mockLogger, mockSend
 
 describe('BaseController', () => {
   beforeEach(() => {
     mockLogger = {
-      error: (y) => y
+      error: noOp
     }
 
     mockResponse = {
-      status: (y) => y,
-      sendStatus: (y) => y
+      status: noOp,
+      sendStatus: noOp
     }
 
     mockSend = {
-      send: (y) => y
+      send: noOp
     }
 
     sinon.spy(mockLogger, 'error')
@@ -50,8 +53,7 @@ describe('BaseController', () => {
 
       controllerUnderTest.handleUpdateResult(mockResult, mockResponse, 'test')
 
-      expect(mockResponse.status).to.have.been.calledWith(200)
-      expect(mockResponse.status().send).to.have.been.calledWith({})
+      expect(mockResponse.sendStatus).to.have.been.calledWith(200)
     })
 
     it('returns 500 when the result is not correctly formed', () => {

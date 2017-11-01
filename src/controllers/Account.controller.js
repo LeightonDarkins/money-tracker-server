@@ -1,12 +1,11 @@
-const AccountService = require('../services/Account/Account.service')
+// const AccountService = require('../services/Account/Account.service')
 const BaseController = require('./Base.controller')
 
 class AccountController extends BaseController {
-  constructor (AccountDB, TransactionDB, logger) {
+  constructor (AccountService, logger) {
     super(logger)
 
-    this.AccountDB = AccountDB
-    this.AccountService = new AccountService(this.logger, this.AccountDB, TransactionDB, Date)
+    this.AccountService = AccountService
   }
 
   createAccount (request, response) {
@@ -57,35 +56,35 @@ class AccountController extends BaseController {
   deleteAccount (request, response) {
     this.logWarn(`deleting account: ${request.params.id}`)
 
-    this.AccountDB.delete(request.params.id)
+    return this.AccountService.deleteAccount(request.params.id)
       .then(CommandResult => {
         return this.handleDeleteResult(CommandResult, response, 'account', this.logger)
       })
       .catch(error => {
         this.logFailedToDeleteResource('account', error)
-        return response.status(500).send(error)
+        return response.status(500).send(error.message)
       })
   }
 
   deleteAccounts (request, response) {
     this.logWarn('deleting accounts')
 
-    this.AccountDB.delete()
+    return this.AccountService.deleteAccounts()
       .then(result => {
-        return response.status(204).send({})
+        return response.sendStatus(204)
       })
       .catch(error => {
         this.logFailedToDeleteResource('accounts', error)
-        return response.status(500).send(error)
+        return response.status(500).send(error.message)
       })
   }
 
   updateAccount (request, response) {
     this.logInfo(`updating account: ${request.params.id}`)
 
-    this.AccountDB.update({ id: request.params.id, account: request.body })
+    return this.AccountService.updateAccount(request.params.id, request.body)
       .then(result => {
-        return this.handleUpdateResult(result, response, 'accou', this.logger)
+        return this.handleUpdateResult(result, response, 'account', this.logger)
       })
       .catch(error => {
         this.logFailedToUpdateResource('account', error)
@@ -96,13 +95,13 @@ class AccountController extends BaseController {
   getBalance (request, response) {
     this.logInfo(`getting balance for account: ${request.params.id}`)
 
-    this.AccountService.getAccountBalance(request.params.id)
+    return this.AccountService.getAccountBalance(request.params.id)
       .then(balance => {
         return response.status(200).send({ balance })
       })
       .catch(error => {
         this.logFailedToGetResource('balance for account', error)
-        return response.status(500).send(error)
+        return response.status(500).send(error.message)
       })
   }
 }

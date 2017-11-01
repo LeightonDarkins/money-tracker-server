@@ -9,6 +9,7 @@ const AccountDB = require('./db/Account/Account.db')
 const AccountModel = require('./models/Account/Account.model')
 const AccountController = require('./controllers/Account.controller')
 const AccountRouter = require('./routers/Account.router')
+const AccountService = require('./services/Account/Account.service')
 
 const CategoryDB = require('./db/Category/Category.db')
 const CategoryModel = require('./models/Category/Category.model')
@@ -31,13 +32,17 @@ module.exports = {
       next()
     })
 
-    let accountRouter = new AccountRouter(new AccountController(new AccountDB(AccountModel, ObjectID), new TransactionDB(TransactionModel, ObjectID), logger))
+    let accountDB = new AccountDB(AccountModel, ObjectID)
+    let transactionDB = new TransactionDB(TransactionModel, ObjectID)
+    let accountService = new AccountService(logger, accountDB, transactionDB, Date)
+
+    let accountRouter = new AccountRouter(new AccountController(accountService, logger))
     accountRouter.setupRoutes(app)
 
     let categoryRouter = new CategoryRouter(new CategoryController(new CategoryDB(CategoryModel, ObjectID), logger))
     categoryRouter.setupRoutes(app)
 
-    let transactionRouter = new TransactionRouter(new TransactionController(new TransactionDB(TransactionModel, ObjectID), logger))
+    let transactionRouter = new TransactionRouter(new TransactionController(transactionDB, logger))
     transactionRouter.setupRoutes(app)
 
     app.listen(port, () => { logger.info(`started on ${port}`) })

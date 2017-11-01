@@ -14,7 +14,7 @@ class BaseController {
       return response.sendStatus(404)
     }
 
-    return response.status(200).send({})
+    return response.sendStatus(200)
   }
 
   handleDeleteResult (CommandResult, response, resource) {
