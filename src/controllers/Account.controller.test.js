@@ -1,4 +1,4 @@
-/* global describe, it, expect, beforeEach, afterEach */
+/* eslint-env jest */
 
 const sinon = require('sinon')
 
@@ -297,7 +297,7 @@ describe('AccountController', () => {
         })
     })
 
-    it('returns a 500 when no records are modified', done => {
+    it('returns a 404 when no records are modified', done => {
       const mockResult = {
         nModified: 0
       }
