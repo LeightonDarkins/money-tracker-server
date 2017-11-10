@@ -109,8 +109,6 @@ module.exports = class AccountService {
 
     return this.TransactionDB.findByAccountId({ account: accountID })
       .then(transactions => {
-        if (transactions.length === 0) throw new Error('NOT FOUND')
-
         return transactions
       })
   }
