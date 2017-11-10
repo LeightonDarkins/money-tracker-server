@@ -400,12 +400,13 @@ describe('AccountController', () => {
       expect(mockResponse.status().send).to.have.been.calledWith('NO_ACCOUNT_ID_PROVIDED')
     })
 
-    it('returns a 404 when no transactions are found', done => {
+    it('returns a 200 when no transactions are found', done => {
       sinon.stub(mockAccountService, 'getTransactionsForAccount').returns(Promise.resolve([]))
 
       accountController.getTransactions(mockRequest, mockResponse)
         .then(() => {
-          expect(mockResponse.sendStatus).to.have.been.calledWith(404)
+          expect(mockResponse.status).to.have.been.calledWith(200)
+          expect(mockResponse.status().send).to.have.been.calledWith([])
 
           mockAccountService.getTransactionsForAccount.restore()
 

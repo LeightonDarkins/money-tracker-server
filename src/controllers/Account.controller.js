@@ -112,8 +112,6 @@ class AccountController extends BaseController {
 
     return this.AccountService.getTransactionsForAccount(request.params.id)
       .then(transactions => {
-        if (transactions.length < 1) return response.sendStatus(404)
-
         return response.status(200).send(transactions)
       })
       .catch(error => {
