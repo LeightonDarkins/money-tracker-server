@@ -1,4 +1,4 @@
-/* global describe, it, expect, beforeEach, afterEach */
+/* eslint-env jest */
 
 const sinon = require('sinon')
 
@@ -51,7 +51,7 @@ describe('AccountService', () => {
       accountService._applyBalancesToAccounts.restore()
     })
 
-    it('calls find on AccountDB', (done) => {
+    it('calls find on AccountDB', done => {
       accountService.getAccounts()
         .then(() => {
           expect(mockAccountDB.find).to.have.been.called()
@@ -70,7 +70,7 @@ describe('AccountService', () => {
       accountService.getAccountBalance.restore()
     })
 
-    it('calls getAccountBalance once for each account it recieves', (done) => {
+    it('calls getAccountBalance once for each account it recieves', done => {
       let accounts = [
         'account-1',
         'account-2',
@@ -95,17 +95,11 @@ describe('AccountService', () => {
       accountService._getAccountBalances.restore()
     })
 
-    it('calls getAccountBalances and applies the balances to the given accounts', (done) => {
+    it('calls getAccountBalances and applies the balances to the given accounts', done => {
       let accounts = [
-        {
-          balance: 0
-        },
-        {
-          balance: 0
-        },
-        {
-          balance: 0
-        }
+        { balance: 0 },
+        { balance: 0 },
+        { balance: 0 }
       ]
 
       accountService._applyBalancesToAccounts(accounts).then((result) => {
@@ -137,7 +131,7 @@ describe('AccountService', () => {
       mockTransactionDB.create.restore()
     })
 
-    it('calls create on AccountDB', (done) => {
+    it('calls create on AccountDB', done => {
       accountService.createAccountWithInitialBalance({ openingBalance: amount })
         .then(() => {
           expect(mockAccountDB.create).to.have.been.calledWith({ openingBalance: amount })
@@ -162,7 +156,7 @@ describe('AccountService', () => {
       mockTransactionDB.findByAccountId.restore()
     })
 
-    it('calls findByAccountId on TransactionDB and returns the correct balance', (done) => {
+    it('calls findByAccountId on TransactionDB and returns the correct balance', done => {
       accountService.getAccountBalance('account-1').then((output) => {
         expect(mockTransactionDB.findByAccountId).to.have.been.calledWith({ account: 'account-1' })
         expect(output).to.equal(3)
@@ -194,7 +188,7 @@ describe('AccountService', () => {
   })
 
   describe('getAccountWithBalance', () => {
-    it('throws a NOT FOUND error when no accounts are returned', (done) => {
+    it('throws a NOT FOUND error when no accounts are returned', done => {
       sinon.stub(mockAccountDB, 'find').returns(Promise.resolve([]))
 
       accountService.getAccountWithBalance('id')
@@ -207,7 +201,7 @@ describe('AccountService', () => {
         })
     })
 
-    it('finds an Account and applies a Balance to it', (done) => {
+    it('finds an Account and applies a Balance to it', done => {
       let accounts = [
         {
           _id: 'account-1'
@@ -221,6 +215,30 @@ describe('AccountService', () => {
         .then(result => {
           expect(mockAccountDB.find).to.have.been.called()
           expect(accountService._applyBalancesToAccounts).to.have.been.called()
+
+          done()
+        })
+    })
+  })
+
+  describe('getTransactionsForAccount', () => {
+    let transactions = [
+      {
+        id: 'transaction-1',
+        category: 'category-2'
+      },
+      {
+        id: 'transaction-2',
+        category: 'category-1'
+      }
+    ]
+
+    it('finds transactions ', done => {
+      sinon.stub(mockTransactionDB, 'findByAccountId').returns(Promise.resolve(transactions))
+
+      accountService.getTransactionsForAccount('account-1')
+        .then(() => {
+          expect(mockTransactionDB.findByAccountId).to.have.been.calledWith({ account: 'account-1' })
 
           done()
         })

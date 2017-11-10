@@ -104,6 +104,23 @@ class AccountController extends BaseController {
         return response.status(500).send(error.message)
       })
   }
+
+  getTransactions (request, response) {
+    if (!request.params || !request.params.id) return response.status(400).send('NO_ACCOUNT_ID_PROVIDED')
+
+    this.logInfo(`getting transactions for account: ${request.params.id}`)
+
+    return this.AccountService.getTransactionsForAccount(request.params.id)
+      .then(transactions => {
+        if (transactions.length < 1) return response.sendStatus(404)
+
+        return response.status(200).send(transactions)
+      })
+      .catch(error => {
+        this.logFailedToGetResource('transactions for account', error)
+        return response.status(500).send(error.message)
+      })
+  }
 }
 
 module.exports = AccountController

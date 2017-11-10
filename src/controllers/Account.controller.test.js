@@ -21,6 +21,7 @@ describe('AccountController', () => {
     mockAccountService = {
       getAccountWithBalance: noOp,
       createAccountWithInitialBalance: noOp,
+      getTransactionsForAccount: noOp,
       getAccounts: noOp,
       deleteAccount: noOp,
       deleteAccounts: noOp,
@@ -60,7 +61,7 @@ describe('AccountController', () => {
   })
 
   describe('createAccount', () => {
-    it('returns an empty 201 when successful', (done) => {
+    it('returns an empty 201 when successful', done => {
       sinon.stub(mockAccountService, 'createAccountWithInitialBalance').returns(Promise.resolve({}))
 
       accountController.createAccount({}, mockResponse)
@@ -74,7 +75,7 @@ describe('AccountController', () => {
         })
     })
 
-    it('returns a 500 error when unsuccessful', (done) => {
+    it('returns a 500 error when unsuccessful', done => {
       sinon.stub(mockAccountService, 'createAccountWithInitialBalance').returns(Promise.reject(mockError))
 
       accountController.createAccount({}, mockResponse)
@@ -91,7 +92,7 @@ describe('AccountController', () => {
   })
 
   describe('getAccounts', () => {
-    it('returns a 200 when successful', (done) => {
+    it('returns a 200 when successful', done => {
       let accounts = [
         'account-1',
         'account-2'
@@ -111,7 +112,7 @@ describe('AccountController', () => {
         })
     })
 
-    it('returns a 500 when unsuccessful', (done) => {
+    it('returns a 500 when unsuccessful', done => {
       sinon.stub(mockAccountService, 'getAccounts').returns(Promise.reject(mockError))
 
       accountController.getAccounts({}, mockResponse)
@@ -128,7 +129,7 @@ describe('AccountController', () => {
   })
 
   describe('getAccount', () => {
-    it('returns a 404 when no account is found', (done) => {
+    it('returns a 404 when no account is found', done => {
       sinon.stub(mockAccountService, 'getAccountWithBalance').returns(Promise.reject(new Error('NOT FOUND')))
 
       accountController.getAccount(mockRequest, mockResponse)
@@ -142,7 +143,7 @@ describe('AccountController', () => {
         })
     })
 
-    it('returns a 500 when unsuccessful', (done) => {
+    it('returns a 500 when unsuccessful', done => {
       sinon.stub(mockAccountService, 'getAccountWithBalance').returns(Promise.reject(mockError))
 
       accountController.getAccount(mockRequest, mockResponse)
@@ -157,7 +158,7 @@ describe('AccountController', () => {
         })
     })
 
-    it('returns a 200 when successful', (done) => {
+    it('returns a 200 when successful', done => {
       const account = {
         _id: 'account-1',
         balance: 0
@@ -179,7 +180,7 @@ describe('AccountController', () => {
   })
 
   describe('deleteAccount', () => {
-    it('it returns a 500 when the delete account result is invalid', (done) => {
+    it('it returns a 500 when the delete account result is invalid', done => {
       const mockCommandResult = {
         result: undefined
       }
@@ -197,7 +198,7 @@ describe('AccountController', () => {
         })
     })
 
-    it('it returns a 500 when an error occurs', (done) => {
+    it('it returns a 500 when an error occurs', done => {
       sinon.stub(mockAccountService, 'deleteAccount').returns(Promise.reject(mockError))
 
       accountController.deleteAccount(mockRequest, mockResponse)
@@ -209,7 +210,7 @@ describe('AccountController', () => {
         })
     })
 
-    it('it returns a 404 when no records are modified', (done) => {
+    it('it returns a 404 when no records are modified', done => {
       const mockCommandResult = {
         result: {
           n: 0
@@ -229,7 +230,7 @@ describe('AccountController', () => {
         })
     })
 
-    it('it returns a 204 when a record is deleted', (done) => {
+    it('it returns a 204 when a record is deleted', done => {
       const mockCommandResult = {
         result: {
           n: 1
@@ -358,6 +359,69 @@ describe('AccountController', () => {
           expect(mockResponse.status().send).to.have.been.calledWith(mockError.message)
 
           mockAccountService.getAccountBalance.restore()
+
+          done()
+        })
+    })
+  })
+
+  describe('getTransactions', () => {
+    let transactions = [
+      'transaction-1',
+      'transaction-2'
+    ]
+
+    let mockRequest = {
+      params: {
+        id: 'account-1'
+      }
+    }
+
+    it('returns a 200 when successful', done => {
+      sinon.stub(mockAccountService, 'getTransactionsForAccount').returns(Promise.resolve(transactions))
+
+      accountController.getTransactions(mockRequest, mockResponse)
+        .then(() => {
+          expect(mockResponse.status).to.have.been.calledWith(200)
+          expect(mockResponse.status().send).to.have.been.calledWith(transactions)
+
+          mockAccountService.getTransactionsForAccount.restore()
+
+          done()
+        })
+    })
+
+    it('returns a 400 when no id parameter is provided', () => {
+      sinon.stub(mockAccountService, 'getTransactionsForAccount').returns(Promise.resolve(transactions))
+
+      accountController.getTransactions({}, mockResponse)
+
+      expect(mockResponse.status).to.have.been.calledWith(400)
+      expect(mockResponse.status().send).to.have.been.calledWith('NO_ACCOUNT_ID_PROVIDED')
+    })
+
+    it('returns a 404 when no transactions are found', done => {
+      sinon.stub(mockAccountService, 'getTransactionsForAccount').returns(Promise.resolve([]))
+
+      accountController.getTransactions(mockRequest, mockResponse)
+        .then(() => {
+          expect(mockResponse.sendStatus).to.have.been.calledWith(404)
+
+          mockAccountService.getTransactionsForAccount.restore()
+
+          done()
+        })
+    })
+
+    it('returns a 500 when a general error occurs', done => {
+      sinon.stub(mockAccountService, 'getTransactionsForAccount').returns(Promise.reject(mockError))
+
+      accountController.getTransactions(mockRequest, mockResponse)
+        .then(() => {
+          expect(mockResponse.status).to.have.been.calledWith(500)
+          expect(mockResponse.status().send).to.have.been.calledWith('error')
+
+          mockAccountService.getTransactionsForAccount.restore()
 
           done()
         })

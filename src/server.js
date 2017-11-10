@@ -34,12 +34,13 @@ module.exports = {
 
     let accountDB = new AccountDB(AccountModel, ObjectID)
     let transactionDB = new TransactionDB(TransactionModel, ObjectID)
+    let categoryDB = new CategoryDB(CategoryModel, ObjectID)
     let accountService = new AccountService(logger, accountDB, transactionDB, Date)
 
     let accountRouter = new AccountRouter(new AccountController(accountService, logger))
     accountRouter.setupRoutes(app)
 
-    let categoryRouter = new CategoryRouter(new CategoryController(new CategoryDB(CategoryModel, ObjectID), logger))
+    let categoryRouter = new CategoryRouter(new CategoryController(categoryDB, logger))
     categoryRouter.setupRoutes(app)
 
     let transactionRouter = new TransactionRouter(new TransactionController(transactionDB, logger))

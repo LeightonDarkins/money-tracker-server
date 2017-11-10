@@ -46,6 +46,7 @@ module.exports = class AccountService {
     return this._getAccountBalances(accounts)
       .then((balances) => {
         this.logger.info(`${this.constructor.name} applying balances to accounts`)
+
         for (let x = 0; x < balances.length; x++) {
           accounts[x].balance = balances[x]
         }
@@ -101,5 +102,16 @@ module.exports = class AccountService {
     this.logger.warn(`${this.constructor.name} updating account: ${accountID}`)
 
     return this.AccountDB.update({ id: accountID, account: account })
+  }
+
+  getTransactionsForAccount (accountID) {
+    this.logger.info(`${this.constructor.name} getting transactions for account: ${accountID}`)
+
+    return this.TransactionDB.findByAccountId({ account: accountID })
+      .then(transactions => {
+        if (transactions.length === 0) throw new Error('NOT FOUND')
+
+        return transactions
+      })
   }
 }

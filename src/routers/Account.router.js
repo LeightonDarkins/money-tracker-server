@@ -11,5 +11,6 @@ module.exports = class AccountRouter {
     app.delete('/account/:id', (req, res) => this.controller.deleteAccount(req, res))
     app.put('/account/:id', (req, res) => this.controller.updateAccount(req, res))
     app.get('/account/:id/balance', (req, res) => this.controller.getBalance(req, res))
+    app.get('/account/:id/transactions', (req, res) => this.controller.getTransactions(req, res))
   }
 }
