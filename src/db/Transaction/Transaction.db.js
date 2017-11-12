@@ -31,6 +31,12 @@ class TransactionDB {
         .then(transactions => {
           this._replaceIDs(transactions)
 
+          transactions.sort((t1, t2) => {
+            if (t1.date > t2.date) return -1
+            if (t1.date < t2.date) return 1
+            return 0
+          })
+
           resolve(transactions)
         })
         .catch(error => reject(error))

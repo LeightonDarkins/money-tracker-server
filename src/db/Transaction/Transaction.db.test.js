@@ -12,8 +12,14 @@ const TransactionModel = {
 }
 
 describe('TransactionDB', () => {
+  let transactions = [
+    { id: 'transaction-1', date: 45 },
+    { id: 'transaction-2', date: 95 },
+    { id: 'transaction-3', date: 76 }
+  ]
+
   beforeEach(() => {
-    sinon.spy(TransactionModel, 'find')
+    sinon.stub(TransactionModel, 'find').returns({ exec: () => Promise.resolve(transactions) })
 
     dbUnderTest = new TransactionDB(TransactionModel, ObjectID)
 
@@ -40,6 +46,15 @@ describe('TransactionDB', () => {
 
       expect(TransactionModel.find.calledOnce).to.equal(true)
       expect(TransactionModel.find.getCall(0).args[0]).to.equal(query)
+    })
+
+    it('orders transactions by date', () => {
+      dbUnderTest.findByAccountId()
+        .then(result => {
+          expect(result[0].date).to.equal(95)
+          expect(result[1].date).to.equal(76)
+          expect(result[2].date).to.equal(45)
+        })
     })
   })
 
