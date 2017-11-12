@@ -15,7 +15,16 @@ class TransactionController extends BaseController {
       })
       .catch(error => {
         this.logFailedToCreateResource('transaction', error)
-        return response.status(500).send(error)
+
+        if (error.name === 'ValidationError') {
+          let keys = Object.keys(error.errors)
+
+          let firstError = error.errors[keys[0]]
+
+          return response.status(400).send({ message: `Validation failed for ${firstError.path} field. Check the value and try again.` })
+        }
+
+        return response.status(500).send(error.messsage)
       })
   }
 

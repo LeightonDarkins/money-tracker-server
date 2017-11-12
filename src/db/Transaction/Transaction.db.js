@@ -21,14 +21,20 @@ class TransactionDB {
 
         resolve(transactions)
       })
-      .catch(error => {
-        reject(error)
-      })
+      .catch(error => reject(error))
     })
   }
 
   findByAccountId (query) {
-    return this.TransactionModel.find(query).exec()
+    return new Promise((resolve, reject) => {
+      return this.TransactionModel.find(query).exec()
+        .then(transactions => {
+          this._replaceIDs(transactions)
+
+          resolve(transactions)
+        })
+        .catch(error => reject(error))
+    })
   }
 
   delete (id) {
