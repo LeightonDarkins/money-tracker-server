@@ -1,4 +1,3 @@
-// const AccountService = require('../services/Account/Account.service')
 const BaseController = require('./Base.controller')
 
 class AccountController extends BaseController {
