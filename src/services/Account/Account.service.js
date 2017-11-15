@@ -26,8 +26,10 @@ module.exports = class AccountService {
       amount,
       category: '59dd17f5549f1471ed426c31',
       account: account,
-      date: this.Date.now()
+      date: new this.Date().setHours(0, 0, 0, 0)
     }
+
+    console.log(`creating initial tranaction: ${initialTransaction.date}`)
 
     return this.TransactionDB.create(initialTransaction)
   }

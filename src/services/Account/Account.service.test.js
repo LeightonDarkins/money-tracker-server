@@ -18,15 +18,17 @@ const mockTransactionDB = {
   findByAccountId: (y) => y
 }
 
-const mockDate = {
-  now: () => 12345
+class MockDate {
+  setHours () {
+    return 12345
+  }
 }
 
 describe('AccountService', () => {
   let accountService
 
   beforeEach(() => {
-    accountService = new AccountService(mockLogger, mockAccountDB, mockTransactionDB, mockDate)
+    accountService = new AccountService(mockLogger, mockAccountDB, mockTransactionDB, MockDate)
   })
 
   describe('getAccounts', () => {
@@ -140,7 +142,7 @@ describe('AccountService', () => {
             account: id,
             amount: amount,
             category: '59dd17f5549f1471ed426c31',
-            date: mockDate.now()})
+            date: new MockDate().setHours()})
 
           done()
         })
@@ -182,7 +184,7 @@ describe('AccountService', () => {
         account: 'account-1',
         amount: 100,
         category: '59dd17f5549f1471ed426c31',
-        date: mockDate.now()
+        date: new MockDate().setHours()
       })
     })
   })
